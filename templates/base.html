@@ -14,10 +14,7 @@
   {% set pezzi = session.get('carrello', {}).values()|sum %}
 
   <div class="annuncio">
-    <div class="annuncio__scorre">
-      <span>Spedizione gratuita da {{ soglia_gratis }} €</span>
-      <span>Ritiro gratuito in negozio · Corso Racconigi 159D</span>
-      <span>Reso facile entro 14 giorni</span>
+    <div class="annuncio__testi">
       <span>Spedizione gratuita da {{ soglia_gratis }} €</span>
       <span>Ritiro gratuito in negozio · Corso Racconigi 159D</span>
       <span>Reso facile entro 14 giorni</span>
