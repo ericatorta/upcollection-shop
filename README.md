@@ -20,7 +20,7 @@ Scritto in **Python + Flask** con architettura **MVC**, database **SQLite** e un
 - Carrello in sessione (anche senza account), barra "spedizione gratuita da 99 €"
 - Checkout con spedizione o ritiro gratuito in negozio, pagamento simulato
 - Account: registrazione, login, profilo, storico ordini con stato di avanzamento
-- Stylist IA: consiglia capi e abbinamenti *solo* dal catalogo reale
+- Stylist IA: consiglia capi e abbinamenti *solo* dal catalogo reale, con le card dei prodotti sotto la risposta; aperta a tutti (5 domande gratis senza account)
 
 **Per il negozio (admin)**
 - Dashboard: incasso, ordini da preparare, clienti, scorte basse
@@ -70,7 +70,7 @@ Sono account dimostrativi: prima di andare online cambiali.
 
 - Le foto dei prodotti non sono nel repository: vengono caricate dal sito del negozio, [upcollectiontorino.com](https://upcollectiontorino.com).
 - I pagamenti sono simulati: nessun addebito reale.
-- La stylist funziona senza chiave (risponde con un messaggio fisso); con `GROQ_API_KEY` usa il modello `llama-3.3-70b-versatile`.
+- La stylist funziona anche senza chiave: capisce per chi è, che capo, marca e budget e cerca nel catalogo. Con `GROQ_API_KEY` risponde il modello `llama-3.3-70b-versatile`.
 
 ---
 

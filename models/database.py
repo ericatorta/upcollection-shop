@@ -282,6 +282,34 @@ def leggi_marche(categoria=""):
         """, (categoria, categoria)).fetchall()
 
 
+def cerca_per_stylist(categoria="", tipi=None, marca="", prezzo_max=0, limite=4):
+    """Capi disponibili che rispettano i criteri capiti dalla domanda.
+    tipi è una lista (es. ["Capispalla"]); lista vuota = qualsiasi tipo.
+    prezzo_max 0 = nessun limite di prezzo.
+    """
+    tipi = tipi or []
+    # tanti "?" quanti sono i tipi: i valori passano sempre come parametri
+    segnaposti = ", ".join("?" for t in tipi) or "''"
+    with db_connection() as conn:
+        return conn.execute("""
+            SELECT * FROM prodotti
+            WHERE quantita > 0
+            AND (? = '' OR categoria = ?)
+            AND (? = 0 OR tipo IN (""" + segnaposti + """))
+            AND (? = '' OR marca = ?)
+            AND (? = 0 OR prezzo <= ?)
+            ORDER BY novita DESC, RANDOM()
+            LIMIT ?
+        """, [categoria, categoria, len(tipi)] + tipi
+             + [marca, marca, prezzo_max, prezzo_max, limite]).fetchall()
+
+
+def trova_prodotti(ids):
+    """Più prodotti per id, nell'ordine in cui li ho chiesti."""
+    trovati = [trova_prodotto(id) for id in ids]
+    return [p for p in trovati if p]
+
+
 # PRODOTTI (pannello admin)
 
 def inserisci_prodotto(nome, marca, categoria, tipo, colore, descrizione,

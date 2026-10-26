@@ -560,6 +560,9 @@ a.tabella__riga:hover { background: var(--sabbia); }
 .chat__tu { justify-self: end; background: var(--inchiostro); color: #fff; border-radius: 18px 18px 4px 18px; }
 .chat__lei { background: var(--sabbia); border-radius: 18px 18px 18px 4px; animation-delay: .15s; }
 .chat__lei::before { content: "La stylist"; display: block; margin-bottom: 6px; font-size: 10px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--blu); }
+.stylist__capi { margin: 6px 0 34px; gap: 28px 12px; }
+.stylist__capi .card__vedi { display: none; }
+.stylist__nota { margin-top: 14px; }
 .stylist .stylist-banner__form input { background: #fff; border-color: var(--linea); color: var(--inchiostro); }
 .stylist .stylist-banner__form input::placeholder { color: var(--grigio); }
 .stylist .stylist-banner__form input:focus { border-color: var(--blu); }
@@ -637,3 +640,4 @@ a.numero:hover { background: var(--sabbia-scura); transform: translateY(-2px); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+.pagina--media { max-width: 1000px; }

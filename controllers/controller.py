@@ -7,6 +7,7 @@ CONTROLLER: tutte le route del negozio (Blueprint "shop").
     contatti     modulo pubblico + stylist IA (Groq)
     admin        dashboard, prodotti (CRUD), ordini, messaggi
 """
+import re
 from functools import wraps
 from flask import Blueprint, current_app, flash, redirect, render_template, request, session, url_for
 from models.database import (
@@ -35,6 +36,8 @@ from models.database import (
     inserisci_messaggio,
     leggi_messaggi,
     elimina_messaggio,
+    cerca_per_stylist,
+    trova_prodotti,
 )
 
 shop = Blueprint("shop", __name__)
@@ -382,49 +385,144 @@ def contatti():
     return render_template("contatti.html")
 
 
+# Parole che la stylist riconosce nella domanda
+PAROLE_UOMO = ["lui", "uomo", "marito", "papà", "papa", "fidanzato", "ragazzo", "fratello", "nonno", "maschile"]
+PAROLE_DONNA = ["lei", "donna", "moglie", "mamma", "fidanzata", "ragazza", "sorella", "nonna", "femminile"]
+PAROLE_TIPO = {
+    "Capispalla": ["piumino", "giacca", "giubbotto", "cappotto", "parka", "giaccone", "caldo", "freddo", "inverno"],
+    "Maglieria": ["maglione", "maglia", "pullover", "cardigan", "gilet", "lana", "cashmere", "elegante", "cena", "serata"],
+    "T-shirt e polo": ["polo", "t-shirt", "maglietta", "tshirt"],
+    "Felpe": ["felpa"],
+    "Pantaloni": ["pantalone", "pantaloni", "jeans"],
+    "Abiti": ["abito", "vestito", "elegante", "cena", "cerimonia", "serata"],
+    "Borse": ["borsa", "borsetta"],
+    "Cappelli": ["cappello", "berretto", "cuffia"],
+    "Calze": ["calze", "calzini"],
+    "Idee regalo": ["regalo", "regalare", "natale", "compleanno"],
+}
+PAROLE_ABBINA = ["abbino", "abbinare", "abbinamento", "abbinarci", "sta bene", "completare"]
+LIMITE_DOMANDE_OSPITE = 5
+
+
+def capisci_domanda(domanda):
+    """Dalla domanda ricava per chi è, che capo, che marca e il budget."""
+    testo = domanda.lower()
+    parole = re.findall(r"[a-zàèéìòù0-9-]+", testo)
+    criteri = {"categoria": "", "tipi": [], "marca": "", "prezzo_max": 0}
+    if any(p in parole for p in PAROLE_UOMO):
+        criteri["categoria"] = "uomo"
+    elif any(p in parole for p in PAROLE_DONNA):
+        criteri["categoria"] = "donna"
+    for tipo, chiavi in PAROLE_TIPO.items():
+        if any(c in parole for c in chiavi) and tipo != "Idee regalo":
+            criteri["tipi"].append(tipo)
+    # "cosa abbino a un pantalone?": propongo gli ALTRI tipi di capo, non i pantaloni
+    if criteri["tipi"] and any(a in testo for a in PAROLE_ABBINA):
+        criteri["tipi"] = [t["tipo"] for t in leggi_tipi(criteri["categoria"])
+                           if t["tipo"] not in criteri["tipi"]
+                           and t["tipo"] not in ("Idee regalo", "Calze")]
+    for m in leggi_marche():
+        if m["marca"].lower() in testo:
+            criteri["marca"] = m["marca"]
+    # "sotto i 50", "50 €", "budget 200", "massimo 100 euro"
+    numeri = re.findall(r"(\d{2,4})\s*(?:€|euro)?", testo)
+    if numeri:
+        criteri["prezzo_max"] = int(numeri[0])
+    return criteri
+
+
+def proposte_dal_catalogo(criteri):
+    """Cerca i capi; se non trova niente allarga piano piano la ricerca."""
+    tentativi = [
+        criteri,
+        dict(criteri, marca=""),
+        dict(criteri, marca="", tipi=[]),
+        dict(criteri, marca="", tipi=[], categoria=""),
+    ]
+    for c in tentativi:
+        capi = cerca_per_stylist(c["categoria"], c["tipi"], c["marca"], c["prezzo_max"], 4)
+        if capi:
+            return capi, c is criteri
+    return [], False
+
+
+def risposta_senza_ia(criteri, capi, esatta):
+    """Risposta scritta da noi quando l'IA non è disponibile."""
+    if not capi:
+        return ("Non ho trovato capi con questi criteri, ma in negozio c'è molto altro: "
+                "scrivici su WhatsApp e ti aiutiamo noi.")
+    dettagli = ""
+    if criteri["categoria"]:
+        dettagli += " per " + ("lui" if criteri["categoria"] == "uomo" else "lei")
+    if criteri["prezzo_max"]:
+        dettagli += " sotto i " + str(criteri["prezzo_max"]) + " €"
+    if esatta:
+        return "Ecco qualche idea" + dettagli + " scelta dal nostro catalogo. Ti piace qualcosa?"
+    return ("Esattamente così non ho niente, ma questi capi" + dettagli
+            + " potrebbero piacerti. Per altro scrivici su WhatsApp!")
+
+
 @shop.route("/stylist", methods=["GET", "POST"])
 def stylist():
-    """Visitatori: risposta fissa. Clienti con account: Groq, con il catalogo come contesto."""
-    utente, risposta, domanda = current_user(), None, ""
+    """Aperta a tutti: chi non ha l'account ha qualche domanda gratis.
+    Con GROQ_API_KEY risponde l'IA, senza chiave cerca comunque nel catalogo.
+    In tutti e due i casi sotto la risposta compaiono le card dei capi consigliati.
+    """
+    utente, risposta, domanda, capi = current_user(), None, "", []
+    usate = session.get("domande_stylist", 0)
+    rimaste = None if utente else max(LIMITE_DOMANDE_OSPITE - usate, 0)
+
     if request.method == "POST":
-        domanda = request.form.get("domanda", "").strip()
-        if not domanda:
-            risposta = None
-        elif not utente:
-            risposta = ("Ciao! Sono la stylist di Up Collection. Accedi o crea un account "
-                        "e ti aiuto a scegliere capi, taglie e abbinamenti dal nostro catalogo.")
-        elif not current_app.config.get("GROQ_API_KEY"):
-            risposta = "La stylist non è ancora attiva: manca GROQ_API_KEY nel file .env."
-        else:
-            # il catalogo diventa un elenco di righe che l'IA può consultare
-            catalogo = "\n".join(
-                "- " + p["nome"] + " | " + p["marca"] + " | " + p["categoria"] + " | "
-                + p["tipo"] + " | " + p["colore"] + " | " + str(p["prezzo"]) + " euro"
-                + " | taglie " + (p["taglie"] or "unica")
-                for p in leggi_prodotti()
-                if p["quantita"] > 0
-            )
-            try:
-                from groq import Groq
-                client = Groq(api_key=current_app.config["GROQ_API_KEY"])
-                risultato = client.chat.completions.create(
-                    model="llama-3.3-70b-versatile",
-                    messages=[
-                        {"role": "system", "content": (
-                            "Sei la stylist di Up Collection, negozio di abbigliamento uomo e donna "
-                            "a Torino dagli anni '60. Rispondi in italiano, con tono caldo e breve "
-                            "(massimo 6 frasi). Consiglia SOLO capi di questo catalogo, citando nome "
-                            "e prezzo. Non dire di aver fatto acquisti o modifiche.\n\nCatalogo:\n"
-                            + catalogo)},
-                        {"role": "user", "content": domanda},
-                    ],
-                    temperature=0.5,
-                    max_tokens=400,
+        domanda = request.form.get("domanda", "").strip()[:300]
+        if domanda and not utente and usate >= LIMITE_DOMANDE_OSPITE:
+            risposta = ("Ti sono piaciuti i miei consigli? Crea un account gratis "
+                        "e continuiamo a scegliere insieme.")
+        elif domanda:
+            if not utente:
+                session["domande_stylist"] = usate + 1
+                rimaste = max(LIMITE_DOMANDE_OSPITE - usate - 1, 0)
+            criteri = capisci_domanda(domanda)
+            capi, esatta = proposte_dal_catalogo(criteri)
+            risposta = risposta_senza_ia(criteri, capi, esatta)
+
+            if current_app.config.get("GROQ_API_KEY"):
+                # il catalogo diventa un elenco con l'id: l'IA cita i capi come [#12]
+                catalogo = "\n".join(
+                    "[#" + str(p["id_prodotti"]) + "] " + p["nome"] + " | " + p["marca"]
+                    + " | " + p["categoria"] + " | " + p["tipo"] + " | " + p["colore"]
+                    + " | " + str(p["prezzo"]) + " euro | taglie " + (p["taglie"] or "unica")
+                    for p in leggi_prodotti()
+                    if p["quantita"] > 0
                 )
-                risposta = risultato.choices[0].message.content
-            except Exception:
-                risposta = "Non riesco a contattare la stylist in questo momento. Riprova tra poco."
-    return render_template("stylist.html", domanda=domanda, risposta=risposta)
+                try:
+                    from groq import Groq
+                    client = Groq(api_key=current_app.config["GROQ_API_KEY"])
+                    risultato = client.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[
+                            {"role": "system", "content": (
+                                "Sei la stylist di Up Collection, negozio di abbigliamento uomo e donna "
+                                "a Torino dagli anni '60. Rispondi in italiano, con tono caldo e breve "
+                                "(massimo 5 frasi). Consiglia da 1 a 4 capi SOLO di questo catalogo: "
+                                "per ognuno scrivi il nome seguito dal suo codice, per esempio "
+                                "\"Piumino Lyne [#12]\". Non inventare capi e non dire di aver fatto "
+                                "acquisti o modifiche.\n\nCatalogo:\n" + catalogo)},
+                            {"role": "user", "content": domanda},
+                        ],
+                        temperature=0.5,
+                        max_tokens=400,
+                    )
+                    testo = risultato.choices[0].message.content
+                    ids = [int(n) for n in re.findall(r"\[#(\d+)\]", testo)]
+                    # tolgo i codici dal testo e mostro le card di quei capi
+                    risposta = re.sub(r"\s*\[#\d+\]", "", testo)
+                    capi = trova_prodotti(list(dict.fromkeys(ids))[:4]) or capi
+                except Exception:
+                    # se l'IA non risponde resta la risposta dal catalogo
+                    pass
+
+    return render_template("stylist.html", domanda=domanda, risposta=risposta,
+                           capi=capi, rimaste=rimaste)
 
 
 # ADMIN
