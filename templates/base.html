@@ -35,6 +35,13 @@
           <a href="{{ url_for('shop.catalogo', tipo='Idee regalo') }}">Idee regalo</a>
           <a href="{{ url_for('shop.stylist') }}">La stylist</a>
           <a href="{{ url_for('shop.contatti') }}">Il negozio</a>
+          {% if utente_loggato %}
+            <a href="{{ url_for('shop.profilo') }}">Il mio account</a>
+            {% if session.get('ruolo') == 'admin' %}<a href="{{ url_for('shop.admin') }}">Pannello admin</a>{% endif %}
+            <a class="menu-mobile__esci" href="{{ url_for('shop.logout') }}">Esci</a>
+          {% else %}
+            <a href="{{ url_for('shop.login') }}">Accedi</a>
+          {% endif %}
         </nav>
       </details>
 
@@ -57,9 +64,18 @@
         </a>
         {% if utente_loggato %}
           {% if session.get('ruolo') == 'admin' %}<a class="azioni__testo azioni__admin" href="{{ url_for('shop.admin') }}">Admin</a>{% endif %}
-          <a href="{{ url_for('shop.profilo') }}" aria-label="Il mio account">
-            <svg class="icona" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
-          </a>
+          {# icona account con tendina: si apre passando sopra col mouse #}
+          <div class="account">
+            <a class="account__icona" href="{{ url_for('shop.profilo') }}" aria-label="Il mio account">
+              <svg class="icona" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
+            </a>
+            <div class="account__menu">
+              <a href="{{ url_for('shop.profilo') }}">Il mio account</a>
+              <a href="{{ url_for('shop.profilo') }}#ordini">I miei ordini</a>
+              {% if session.get('ruolo') == 'admin' %}<a href="{{ url_for('shop.admin') }}">Pannello admin</a>{% endif %}
+              <a class="account__esci" href="{{ url_for('shop.logout') }}">Esci</a>
+            </div>
+          </div>
         {% else %}
           <a href="{{ url_for('shop.login') }}" aria-label="Accedi">
             <svg class="icona" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
