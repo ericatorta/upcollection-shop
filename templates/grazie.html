@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block titolo %}Grazie!{% endblock %}
+
+{% block contenuto %}
+<section class="wrap pagina grazie">
+  <div class="grazie__spunta">✓</div>
+  <p class="occhiello">Ordine n. {{ ordine.id_ordini }}</p>
+  <h1 class="titolo titolo--grande">Grazie, <em>{{ ordine.destinatario.split(' ')[0] }}</em>.</h1>
+  <p>
+    {% if ordine.consegna == 'ritiro' %}
+      Ti chiamiamo al {{ ordine.telefono }} quando è pronto: lo trovi in {{ negozio.indirizzo }}.
+    {% else %}
+      Lo prepariamo con cura e lo spediamo a {{ ordine.indirizzo }}, {{ ordine.cap }} {{ ordine.citta }}.
+    {% endif %}
+  </p>
+  <ul class="mini-righe mini-righe--centro">
+    {% for r in righe %}
+      <li><img src="{{ r.immagine|replace('.jpg', '-s.jpg') }}" alt=""><span><strong>{{ r.marca }}</strong> {{ r.nome }}<small>{% if r.taglia %}Taglia {{ r.taglia }} · {% endif %}× {{ r.quantita }}</small></span><span>{{ (r.prezzo * r.quantita)|euro }}</span></li>
+    {% endfor %}
+  </ul>
+  <p class="grazie__totale">Totale {{ ordine.totale|euro }}</p>
+  <div class="bottoni bottoni--centro">
+    <a class="bottone bottone--pieno" href="{{ url_for('shop.scheda_ordine', id=ordine.id_ordini) }}">Vedi l'ordine</a>
+    <a class="bottone" href="{{ url_for('shop.catalogo') }}">Continua lo shopping</a>
+  </div>
+</section>
+{% endblock %}

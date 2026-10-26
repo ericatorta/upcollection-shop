@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block titolo %}Elimina prodotto · Admin{% endblock %}
+{% block body_class %}pagina-admin{% endblock %}
+
+{% block contenuto %}
+<section class="wrap pagina vuoto">
+  {% if p.immagini %}<img class="anteprima anteprima--piccola" src="{{ p.immagini.split(',')[0]|replace('.jpg', '-s.jpg') }}" alt="">{% endif %}
+  <p class="occhiello">{{ p.marca }}</p>
+  <h1 class="titolo">Eliminare “{{ p.nome }}”?</h1>
+  <p>Sparisce dal catalogo. Gli ordini già fatti restano nello storico.</p>
+  <form method="post" class="bottoni bottoni--centro">
+    <a class="bottone" href="{{ url_for('shop.admin_prodotti') }}">Annulla</a>
+    <button class="bottone bottone--rosso">Sì, elimina</button>
+  </form>
+</section>
+{% endblock %}

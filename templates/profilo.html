@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block titolo %}Il mio account{% endblock %}
+
+{% block contenuto %}
+<section class="wrap pagina">
+  <div class="profilo-testa">
+    <div>
+      <p class="occhiello">Il mio account</p>
+      <h1 class="titolo titolo--grande">Ciao, <em>{{ utente.nome }}</em></h1>
+    </div>
+    <a class="bottone" href="{{ url_for('shop.logout') }}">Esci</a>
+  </div>
+
+  <div class="profilo">
+    <div id="ordini">
+      <h2 class="sottotitolo">I miei ordini</h2>
+      {% if ordini %}
+        <div class="tabella">
+          {% for o in ordini %}
+            <a class="tabella__riga" href="{{ url_for('shop.scheda_ordine', id=o.id_ordini) }}">
+              <span><strong>#{{ o.id_ordini }}</strong><small>{{ o.data[:10] }}</small></span>
+              <span>{{ o.capi }} {{ 'capo' if o.capi == 1 else 'capi' }} · {{ 'Ritiro' if o.consegna == 'ritiro' else 'Spedizione' }}</span>
+              <span class="stato stato--{{ o.stato|replace(' ', '-') }}">{{ o.stato }}</span>
+              <span>{{ o.totale|euro }}</span>
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="muted">Non hai ancora fatto ordini. <a class="sottolineato" href="{{ url_for('shop.catalogo', novita=1) }}">Scopri le novità</a></p>
+      {% endif %}
+    </div>
+
+    <form method="post" class="modulo riquadro-bianco">
+      <h2 class="sottotitolo">I miei dati</h2>
+      <label>Nome<input name="nome" value="{{ utente.nome }}" required></label>
+      <label>Cognome<input name="cognome" value="{{ utente.cognome }}" required></label>
+      <label>Email<input name="email" type="email" value="{{ utente.email }}" required></label>
+      <p class="muted piccolo">Username: {{ utente.username }}</p>
+      <button class="bottone bottone--pieno">Salva</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

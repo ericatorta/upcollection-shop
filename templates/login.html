@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block titolo %}Accedi{% endblock %}
+
+{% block contenuto %}
+<section class="accesso">
+  <div class="accesso__foto"><img src="https://upcollectiontorino.com/assets/img/hero/4.jpg" alt=""></div>
+  <div class="accesso__modulo">
+    <p class="occhiello">Il tuo account</p>
+    <h1 class="titolo titolo--grande">Bentornata/o</h1>
+    <form method="post" class="modulo">
+      <label>Username<input name="username" required autocomplete="username" autofocus></label>
+      <label>Password<input name="password" type="password" required autocomplete="current-password"></label>
+      <button class="bottone bottone--pieno bottone--largo">Accedi</button>
+    </form>
+    <p class="muted">Prima volta qui? <a class="sottolineato" href="{{ url_for('shop.registrati', next=request.args.get('next', '')) }}">Crea un account</a> in 30 secondi.</p>
+  </div>
+</section>
+{% endblock %}

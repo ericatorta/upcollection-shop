@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block titolo %}{{ 'Nuovo prodotto' if nuovo else 'Modifica prodotto' }} · Admin{% endblock %}
+{% block body_class %}pagina-admin{% endblock %}
+
+{% block contenuto %}
+<section class="wrap pagina">
+  <p class="occhiello"><a href="{{ url_for('shop.admin_prodotti') }}">Prodotti</a> / {{ 'Nuovo' if nuovo else 'Modifica' }}</p>
+  <h1 class="titolo titolo--grande">{{ 'Nuovo prodotto' if nuovo else p.nome }}</h1>
+
+  <form method="post" class="cassa">
+    <div class="modulo">
+      <label>Nome<input name="nome" required value="{{ p.nome if p else '' }}"></label>
+      <div class="campi">
+        <label>Marca
+          <input name="marca" list="elenco-marche" required value="{{ p.marca if p else '' }}">
+          <datalist id="elenco-marche">{% for m in marche %}<option value="{{ m.marca }}">{% endfor %}</datalist>
+        </label>
+        <label>Tipo
+          <input name="tipo" list="elenco-tipi" required value="{{ p.tipo if p else '' }}">
+          <datalist id="elenco-tipi">{% for t in tipi %}<option value="{{ t.tipo }}">{% endfor %}</datalist>
+        </label>
+      </div>
+      <div class="campi">
+        <label>Reparto
+          <select name="categoria">
+            <option value="donna" {% if p and p.categoria == 'donna' %}selected{% endif %}>Donna</option>
+            <option value="uomo" {% if p and p.categoria == 'uomo' %}selected{% endif %}>Uomo</option>
+          </select>
+        </label>
+        <label>Colore<input name="colore" value="{{ p.colore if p else '' }}"></label>
+      </div>
+      <div class="campi">
+        <label>Prezzo (€)<input name="prezzo" type="number" step="0.01" min="0" required value="{{ p.prezzo if p else '' }}"></label>
+        <label>Pezzi disponibili<input name="quantita" type="number" min="0" required value="{{ p.quantita if p else 1 }}"></label>
+      </div>
+      <label>Taglie <small>separate da virgola, vuoto = taglia unica</small><input name="taglie" value="{{ p.taglie if p else 'XS,S,M,L,XL' }}"></label>
+      <label>Dettagli <small>un punto per riga</small><textarea name="descrizione" rows="5">{{ p.descrizione if p else '' }}</textarea></label>
+      <label>Foto <small>un indirizzo per riga: la prima è la principale, la seconda appare al passaggio del mouse</small>
+        <textarea name="immagini" rows="4">{{ p.immagini.split(',')|join('\n') if p else '' }}</textarea>
+      </label>
+      <label class="spunta"><input type="checkbox" name="novita" {% if p and p.novita %}checked{% endif %}> Mostra tra le novità</label>
+    </div>
+    <aside class="riepilogo">
+      <h2>Anteprima</h2>
+      {% if p and p.immagini %}
+        <img class="anteprima" src="{{ p.immagini.split(',')[0] }}" alt="">
+      {% else %}
+        <p class="muted">L'anteprima appare dopo il salvataggio.</p>
+      {% endif %}
+      <button class="bottone bottone--pieno bottone--largo">{{ 'Inserisci' if nuovo else 'Salva le modifiche' }}</button>
+      <a class="link-freccia" href="{{ url_for('shop.admin_prodotti') }}">Annulla</a>
+    </aside>
+  </form>
+</section>
+{% endblock %}

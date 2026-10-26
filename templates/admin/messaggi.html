@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block titolo %}Messaggi · Admin{% endblock %}
+{% block body_class %}pagina-admin{% endblock %}
+
+{% block contenuto %}
+<section class="wrap pagina">
+  <p class="occhiello">Pannello del negozio</p>
+  <h1 class="titolo titolo--grande">Messaggi</h1>
+  {% include "admin/_nav.html" %}
+
+  <div class="messaggi">
+    {% for m in messaggi %}
+      <article class="riquadro-bianco messaggio">
+        <header>
+          <div><strong>{{ m.nome }}</strong> · <a class="sottolineato" href="mailto:{{ m.email }}?subject={{ ('Re: ' ~ (m.oggetto or 'il tuo messaggio'))|urlencode }}">{{ m.email }}</a></div>
+          <small class="muted">{{ m.data[:16] }}</small>
+        </header>
+        {% if m.oggetto %}<p class="occhiello">{{ m.oggetto }}</p>{% endif %}
+        <p>{{ m.messaggio }}</p>
+        <form method="post" action="{{ url_for('shop.elimina_messaggio_route', id=m.id_messaggi) }}" onsubmit="return confirm('Eliminare il messaggio?')">
+          <button class="link link--rosso">Elimina</button>
+        </form>
+      </article>
+    {% else %}
+      <p class="muted">Nessun messaggio.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

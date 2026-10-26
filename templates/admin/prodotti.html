@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block titolo %}Prodotti · Admin{% endblock %}
+{% block body_class %}pagina-admin{% endblock %}
+
+{% block contenuto %}
+<section class="wrap pagina">
+  <div class="profilo-testa">
+    <div>
+      <p class="occhiello">Pannello del negozio</p>
+      <h1 class="titolo titolo--grande">Prodotti</h1>
+    </div>
+    <a class="bottone bottone--pieno" href="{{ url_for('shop.aggiungi_prodotto') }}">+ Nuovo prodotto</a>
+  </div>
+  {% include "admin/_nav.html" %}
+
+  <form class="filtri" method="get">
+    <label class="filtri__cerca">
+      <svg class="icona" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+      <input type="search" name="q" value="{{ q }}" placeholder="Cerca per nome, marca, tipo, colore">
+    </label>
+    <button class="bottone">Cerca</button>
+  </form>
+
+  <div class="tabella tabella--prodotti">
+    {% for p in prodotti %}
+      <div class="tabella__riga">
+        <img src="{{ p.immagini.split(',')[0]|replace('.jpg', '-s.jpg') }}" alt="">
+        <span><strong>{{ p.nome }}</strong><small>{{ p.marca }} · {{ p.categoria|capitalize }} · {{ p.tipo }}{% if p.novita %} · <em>novità</em>{% endif %}</small></span>
+        <span>{{ p.prezzo|euro }}</span>
+        <span class="{% if p.quantita <= 2 %}scorta{% endif %}">{{ p.quantita }} pz</span>
+        <span class="tabella__azioni">
+          <a class="link" href="{{ url_for('shop.prodotto', id=p.id_prodotti) }}">Vedi</a>
+          <a class="link" href="{{ url_for('shop.modifica_prodotto_route', id=p.id_prodotti) }}">Modifica</a>
+          <a class="link link--rosso" href="{{ url_for('shop.elimina_prodotto_route', id=p.id_prodotti) }}">Elimina</a>
+        </span>
+      </div>
+    {% else %}
+      <p class="muted">Nessun prodotto trovato.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

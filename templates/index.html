@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block body_class %}pagina-home{% endblock %}
+
+{% block contenuto %}
+
+<section class="apertura">
+  <div class="apertura__foto">
+    <img src="https://upcollectiontorino.com/assets/img/hero/1.jpg" alt="Nuova collezione donna">
+    <img src="https://upcollectiontorino.com/assets/img/hero/3.jpg" alt="" class="apertura__seconda">
+  </div>
+  <div class="apertura__testo">
+    <p class="occhiello">Autunno · Inverno 2026</p>
+    <h1>La nuova stagione<br><em>è arrivata in negozio.</em></h1>
+    <p class="apertura__sotto">Capi scelti uno a uno a Torino, dagli anni '60. Ordina online o passa a provarli.</p>
+    <div class="bottoni">
+      <a class="bottone bottone--chiaro" href="{{ url_for('shop.catalogo', categoria='donna') }}">Shop Donna</a>
+      <a class="bottone bottone--bordo-chiaro" href="{{ url_for('shop.catalogo', categoria='uomo') }}">Shop Uomo</a>
+    </div>
+  </div>
+</section>
+
+<section class="sezione wrap">
+  <div class="sezione__testa">
+    <div>
+      <p class="occhiello">Appena arrivati</p>
+      <h2 class="titolo">Novità</h2>
+    </div>
+    <a class="link-freccia" href="{{ url_for('shop.catalogo', novita=1) }}">Vedi tutte</a>
+  </div>
+  <div class="fila">
+    {% for p in novita %}{% include "_card.html" %}{% endfor %}
+  </div>
+</section>
+
+<section class="riquadri wrap">
+  <a class="riquadro" href="{{ url_for('shop.catalogo', categoria='donna') }}">
+    <img src="https://upcollectiontorino.com/assets/img/hero/2.jpg" alt="Abbigliamento donna" loading="lazy">
+    <span class="riquadro__testo"><span class="occhiello">Collezione</span><strong>Donna</strong><span class="link-freccia">Scopri</span></span>
+  </a>
+  <a class="riquadro" href="{{ url_for('shop.catalogo', categoria='uomo') }}">
+    <img src="https://upcollectiontorino.com/assets/img/prodotti/bl-piumino-ballard-nero/2.jpg" alt="Abbigliamento uomo" loading="lazy">
+    <span class="riquadro__testo"><span class="occhiello">Collezione</span><strong>Uomo</strong><span class="link-freccia">Scopri</span></span>
+  </a>
+</section>
+
+<section class="marchi" aria-label="I nostri marchi">
+  <div class="marchi__scorre">
+    {% for giro in range(2) %}
+      {% for m in marche %}
+        <a href="{{ url_for('shop.catalogo', marca=m.marca) }}">{{ m.marca }}</a><span aria-hidden="true">✦</span>
+      {% endfor %}
+    {% endfor %}
+  </div>
+</section>
+
+<section class="storia">
+  <div class="wrap storia__griglia">
+    <div class="storia__numero">
+      <span>dal</span>
+      <strong>'60</strong>
+    </div>
+    <div class="storia__testo">
+      <p class="occhiello">La nostra storia</p>
+      <h2 class="titolo">Un negozio di famiglia,<br><em>da tre generazioni.</em></h2>
+      <p>Tutto inizia negli anni '60, quando Francesco apre il negozio per sua moglie Lena, sarta: lei conosceva i tessuti e il modo in cui un capo deve cadere addosso.</p>
+      <p>Tra questi scaffali è cresciuto Meo, che ci ha lavorato fianco a fianco con Carmen. Oggi c'è Federico, la terza generazione, con la stessa cura per ogni capo e per ogni persona che entra.</p>
+      <a class="bottone" href="{{ url_for('shop.contatti') }}">Vieni a trovarci</a>
+    </div>
+  </div>
+</section>
+
+<section class="sezione wrap">
+  <div class="sezione__testa">
+    <div>
+      <p class="occhiello">Scelti da noi</p>
+      <h2 class="titolo">Potrebbe piacerti</h2>
+    </div>
+    <a class="link-freccia" href="{{ url_for('shop.catalogo') }}">Tutto il catalogo</a>
+  </div>
+  <div class="griglia">
+    {% for p in selezione %}{% include "_card.html" %}{% endfor %}
+  </div>
+</section>
+
+<section class="stylist-banner wrap">
+  <div>
+    <p class="occhiello">Novità sul sito</p>
+    <h2 class="titolo">Non sai cosa abbinare?<br><em>Chiedi alla stylist.</em></h2>
+    <p>Scrivi l'occasione, il tuo stile o il budget: ti suggerisce i capi giusti dal nostro catalogo.</p>
+  </div>
+  <form class="stylist-banner__form" action="{{ url_for('shop.stylist') }}" method="post">
+    <input name="domanda" placeholder="Es. un look per una cena, budget 200 €" required>
+    <button class="bottone">Chiedi</button>
+  </form>
+</section>
+
+{% endblock %}

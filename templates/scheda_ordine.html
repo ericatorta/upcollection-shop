@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block titolo %}Ordine #{{ ordine.id_ordini }}{% endblock %}
+
+{% block contenuto %}
+<section class="wrap pagina">
+  <p class="occhiello">
+    {% if session.get('ruolo') == 'admin' %}<a href="{{ url_for('shop.admin_ordini') }}">Ordini</a>{% else %}<a href="{{ url_for('shop.profilo') }}">Il mio account</a>{% endif %} / Ordine #{{ ordine.id_ordini }}
+  </p>
+  <div class="profilo-testa">
+    <h1 class="titolo titolo--grande">Ordine #{{ ordine.id_ordini }}</h1>
+    <span class="stato stato--grande stato--{{ ordine.stato|replace(' ', '-') }}">{{ ordine.stato }}</span>
+  </div>
+
+  {# avanzamento: ricevuto -> preparazione -> spedito/pronto -> consegnato #}
+  {% set passi = ['ricevuto', 'in preparazione', 'pronto per il ritiro' if ordine.consegna == 'ritiro' else 'spedito', 'consegnato'] %}
+  {% if ordine.stato != 'annullato' %}
+    <ol class="avanzamento">
+      {% for passo in passi %}
+        <li class="{% if passi.index(passo) <= (passi.index(ordine.stato) if ordine.stato in passi else 0) %}fatto{% endif %}">{{ passo }}</li>
+      {% endfor %}
+    </ol>
+  {% endif %}
+
+  <div class="cassa">
+    <div>
+      <ul class="mini-righe">
+        {% for r in righe %}
+          <li><img src="{{ r.immagine|replace('.jpg', '-s.jpg') }}" alt=""><span><strong>{{ r.marca }}</strong> {{ r.nome }}<small>{% if r.taglia %}Taglia {{ r.taglia }} · {% endif %}× {{ r.quantita }} · {{ r.prezzo|euro }}</small></span><span>{{ (r.prezzo * r.quantita)|euro }}</span></li>
+        {% endfor %}
+      </ul>
+    </div>
+    <aside class="riepilogo">
+      <h2>Dettagli</h2>
+      <dl>
+        <div><dt>Data</dt><dd>{{ ordine.data[:16] }}</dd></div>
+        <div><dt>Cliente</dt><dd>{{ ordine.destinatario }}</dd></div>
+        <div><dt>Telefono</dt><dd>{{ ordine.telefono }}</dd></div>
+        <div><dt>Consegna</dt><dd>{% if ordine.consegna == 'ritiro' %}Ritiro in negozio{% else %}{{ ordine.indirizzo }}, {{ ordine.cap }} {{ ordine.citta }}{% endif %}</dd></div>
+        <div><dt>Pagamento</dt><dd>{{ ordine.pagamento }}</dd></div>
+        {% if ordine.note %}<div><dt>Note</dt><dd>{{ ordine.note }}</dd></div>{% endif %}
+        <div><dt>Spedizione</dt><dd>{% if ordine.spedizione %}{{ ordine.spedizione|euro }}{% else %}Gratis{% endif %}</dd></div>
+        <div class="riepilogo__totale"><dt>Totale</dt><dd>{{ ordine.totale|euro }}</dd></div>
+      </dl>
+      {% if session.get('ruolo') == 'admin' %}
+        <form class="modulo" method="post" action="{{ url_for('shop.cambia_stato_ordine', id=ordine.id_ordini) }}">
+          <label>Cambia stato
+            <select name="stato">
+              {% for s in stati %}<option {% if s == ordine.stato %}selected{% endif %}>{{ s }}</option>{% endfor %}
+            </select>
+          </label>
+          <button class="bottone bottone--pieno bottone--largo">Aggiorna</button>
+        </form>
+      {% endif %}
+    </aside>
+  </div>
+</section>
+{% endblock %}

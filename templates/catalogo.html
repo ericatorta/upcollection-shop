@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block titolo %}{% if filtri.categoria %}{{ filtri.categoria|capitalize }}{% elif filtri.novita %}Novità{% elif filtri.marca %}{{ filtri.marca }}{% else %}Catalogo{% endif %}{% endblock %}
+
+{% block contenuto %}
+<section class="catalogo-testa wrap">
+  <p class="occhiello">
+    <a href="{{ url_for('shop.index') }}">Home</a> / Catalogo{% if filtri.categoria %} / {{ filtri.categoria|capitalize }}{% endif %}
+  </p>
+  <h1 class="titolo titolo--grande">
+    {% if filtri.q %}“{{ filtri.q }}”
+    {% elif filtri.tipo %}{{ filtri.tipo }}{% if filtri.categoria %} <em>{{ filtri.categoria }}</em>{% endif %}
+    {% elif filtri.marca %}{{ filtri.marca }}
+    {% elif filtri.novita %}Novità
+    {% elif filtri.categoria %}Collezione <em>{{ filtri.categoria }}</em>
+    {% else %}Tutto il catalogo{% endif %}
+  </h1>
+  <p class="muted">{{ prodotti|length }} {{ 'capo' if prodotti|length == 1 else 'capi' }}</p>
+
+  {# categorie veloci #}
+  <nav class="pillole">
+    <a class="pillola {% if not filtri.categoria %}attiva{% endif %}" href="{{ url_for('shop.catalogo', tipo=filtri.tipo, marca=filtri.marca, q=filtri.q) }}">Tutti</a>
+    <a class="pillola {% if filtri.categoria == 'donna' %}attiva{% endif %}" href="{{ url_for('shop.catalogo', categoria='donna') }}">Donna</a>
+    <a class="pillola {% if filtri.categoria == 'uomo' %}attiva{% endif %}" href="{{ url_for('shop.catalogo', categoria='uomo') }}">Uomo</a>
+    {% for t in tipi %}
+      <a class="pillola {% if filtri.tipo == t.tipo %}attiva{% endif %}" href="{{ url_for('shop.catalogo', categoria=filtri.categoria, tipo=t.tipo) }}">{{ t.tipo }} <small>{{ t.totale }}</small></a>
+    {% endfor %}
+  </nav>
+
+  <form id="cerca" class="filtri" method="get" action="{{ url_for('shop.catalogo') }}">
+    <input type="hidden" name="categoria" value="{{ filtri.categoria }}">
+    <input type="hidden" name="tipo" value="{{ filtri.tipo }}">
+    {% if filtri.novita %}<input type="hidden" name="novita" value="1">{% endif %}
+    <label class="filtri__cerca">
+      <svg class="icona" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+      <input type="search" name="q" value="{{ filtri.q }}" placeholder="Cerca un capo, un marchio, un colore…">
+    </label>
+    <select name="marca" aria-label="Marchio">
+      <option value="">Tutti i marchi</option>
+      {% for m in marche %}
+        <option value="{{ m.marca }}" {% if filtri.marca == m.marca %}selected{% endif %}>{{ m.marca }} ({{ m.totale }})</option>
+      {% endfor %}
+    </select>
+    <select name="ordina" aria-label="Ordina">
+      <option value="">In evidenza</option>
+      <option value="prezzo-crescente" {% if filtri.ordina == 'prezzo-crescente' %}selected{% endif %}>Prezzo crescente</option>
+      <option value="prezzo-decrescente" {% if filtri.ordina == 'prezzo-decrescente' %}selected{% endif %}>Prezzo decrescente</option>
+    </select>
+    <button class="bottone">Applica</button>
+  </form>
+</section>
+
+<section class="wrap">
+  {% if prodotti %}
+    <div class="griglia">
+      {% for p in prodotti %}{% include "_card.html" %}{% endfor %}
+    </div>
+  {% else %}
+    <div class="vuoto">
+      <h2 class="titolo">Nessun capo trovato</h2>
+      <p>Prova a togliere qualche filtro, o chiedici su WhatsApp: in negozio abbiamo anche altro.</p>
+      <a class="bottone" href="{{ url_for('shop.catalogo') }}">Vedi tutto il catalogo</a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

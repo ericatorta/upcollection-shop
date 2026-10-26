@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block titolo %}Ordini · Admin{% endblock %}
+{% block body_class %}pagina-admin{% endblock %}
+
+{% block contenuto %}
+<section class="wrap pagina">
+  <p class="occhiello">Pannello del negozio</p>
+  <h1 class="titolo titolo--grande">Ordini</h1>
+  {% include "admin/_nav.html" %}
+
+  <nav class="pillole">
+    <a class="pillola {% if not stato %}attiva{% endif %}" href="{{ url_for('shop.admin_ordini') }}">Tutti</a>
+    {% for s in stati %}
+      <a class="pillola {% if stato == s %}attiva{% endif %}" href="{{ url_for('shop.admin_ordini', stato=s) }}">{{ s|capitalize }}</a>
+    {% endfor %}
+  </nav>
+
+  <div class="tabella">
+    {% for o in ordini %}
+      <a class="tabella__riga" href="{{ url_for('shop.scheda_ordine', id=o.id_ordini) }}">
+        <span><strong>#{{ o.id_ordini }}</strong><small>{{ o.data[:16] }}</small></span>
+        <span>{{ o.destinatario }}<small>@{{ o.username }} · {{ o.capi }} capi · {{ 'Ritiro' if o.consegna == 'ritiro' else o.citta }}</small></span>
+        <span class="stato stato--{{ o.stato|replace(' ', '-') }}">{{ o.stato }}</span>
+        <span>{{ o.totale|euro }}</span>
+      </a>
+    {% else %}
+      <p class="muted">Nessun ordine{% if stato %} con stato “{{ stato }}”{% endif %}.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

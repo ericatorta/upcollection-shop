@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block titolo %}Admin{% endblock %}
+{% block body_class %}pagina-admin{% endblock %}
+
+{% block contenuto %}
+<section class="wrap pagina">
+  <p class="occhiello">Pannello del negozio</p>
+  <h1 class="titolo titolo--grande">Buongiorno.</h1>
+  {% include "admin/_nav.html" %}
+
+  <div class="numeri">
+    <div class="numero numero--blu"><span>Incasso</span><strong>{{ numeri.incasso|euro }}</strong></div>
+    <a class="numero" href="{{ url_for('shop.admin_ordini', stato='ricevuto') }}"><span>Da preparare</span><strong>{{ numeri.da_preparare }}</strong></a>
+    <a class="numero" href="{{ url_for('shop.admin_ordini') }}"><span>Ordini</span><strong>{{ numeri.ordini }}</strong></a>
+    <div class="numero"><span>Clienti</span><strong>{{ numeri.clienti }}</strong></div>
+    <a class="numero" href="{{ url_for('shop.admin_prodotti') }}"><span>Prodotti</span><strong>{{ numeri.prodotti }}</strong></a>
+    <a class="numero" href="{{ url_for('shop.admin_messaggi') }}"><span>Messaggi</span><strong>{{ numeri.messaggi }}</strong></a>
+  </div>
+
+  <div class="profilo">
+    <div>
+      <h2 class="sottotitolo">Ultimi ordini</h2>
+      {% if ultimi %}
+        <div class="tabella">
+          {% for o in ultimi %}
+            <a class="tabella__riga" href="{{ url_for('shop.scheda_ordine', id=o.id_ordini) }}">
+              <span><strong>#{{ o.id_ordini }}</strong><small>{{ o.data[:16] }}</small></span>
+              <span>{{ o.destinatario }}<small>{{ o.capi }} capi · {{ 'Ritiro' if o.consegna == 'ritiro' else 'Spedizione' }}</small></span>
+              <span class="stato stato--{{ o.stato|replace(' ', '-') }}">{{ o.stato }}</span>
+              <span>{{ o.totale|euro }}</span>
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="muted">Ancora nessun ordine.</p>
+      {% endif %}
+    </div>
+    <div class="riquadro-bianco">
+      <h2 class="sottotitolo">Scorte basse</h2>
+      {% if scorte %}
+        <ul class="mini-righe">
+          {% for p in scorte %}
+            <li><img src="{{ p.immagini.split(',')[0]|replace('.jpg', '-s.jpg') }}" alt=""><span><strong>{{ p.marca }}</strong> {{ p.nome }}<small>{{ p.quantita }} rimasti</small></span><a class="link" href="{{ url_for('shop.modifica_prodotto_route', id=p.id_prodotti) }}">Modifica</a></li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="muted">Tutto ben fornito.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

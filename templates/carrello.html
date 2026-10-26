@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block titolo %}Carrello{% endblock %}
+
+{% block contenuto %}
+<section class="wrap pagina">
+  <h1 class="titolo titolo--grande">Il tuo carrello</h1>
+
+  {% if righe %}
+  <div class="cassa">
+    <div class="righe">
+      {% for r in righe %}
+        {% set p = r.prodotto %}
+        <article class="riga">
+          <a class="riga__foto" href="{{ url_for('shop.prodotto', id=p.id_prodotti) }}">
+            <img src="{{ p.immagini.split(',')[0]|replace('.jpg', '-s.jpg') }}" alt="{{ p.nome }}">
+          </a>
+          <div class="riga__info">
+            <p class="card__marca">{{ p.marca }}</p>
+            <h3><a href="{{ url_for('shop.prodotto', id=p.id_prodotti) }}">{{ p.nome }}</a></h3>
+            <p class="muted">{% if r.taglia %}Taglia {{ r.taglia }} · {% endif %}{{ p.prezzo|euro }}</p>
+            <div class="riga__azioni">
+              <form action="{{ url_for('shop.aggiorna_carrello') }}" method="post" class="quantita-form">
+                <input type="hidden" name="chiave" value="{{ r.chiave }}">
+                <button name="quantita" value="{{ r.quantita - 1 }}" aria-label="Uno in meno">−</button>
+                <span>{{ r.quantita }}</span>
+                <button name="quantita" value="{{ r.quantita + 1 }}" aria-label="Uno in più" {% if r.quantita >= p.quantita %}disabled{% endif %}>+</button>
+              </form>
+              <form action="{{ url_for('shop.rimuovi_dal_carrello') }}" method="post">
+                <input type="hidden" name="chiave" value="{{ r.chiave }}">
+                <button class="link">Rimuovi</button>
+              </form>
+            </div>
+          </div>
+          <p class="riga__totale">{{ r.totale_riga|euro }}</p>
+        </article>
+      {% endfor %}
+    </div>
+
+    <aside class="riepilogo">
+      <h2>Riepilogo</h2>
+      {% if subtotale < soglia_gratis %}
+        {% set percento = (subtotale / soglia_gratis * 100)|round|int %}
+        <p class="soglia">Ti mancano <strong>{{ (soglia_gratis - subtotale)|euro }}</strong> per la spedizione gratuita</p>
+        <div class="barra"><span style="width: {{ percento }}%"></span></div>
+      {% else %}
+        <p class="soglia soglia--ok">Hai la spedizione gratuita ✓</p>
+        <div class="barra"><span style="width: 100%"></span></div>
+      {% endif %}
+      <dl>
+        <div><dt>Subtotale</dt><dd>{{ subtotale|euro }}</dd></div>
+        <div><dt>Spedizione</dt><dd>{% if spedizione %}{{ spedizione|euro }}{% else %}Gratis{% endif %}</dd></div>
+        <div class="riepilogo__totale"><dt>Totale</dt><dd>{{ (subtotale + spedizione)|euro }}</dd></div>
+      </dl>
+      <p class="muted piccolo">Con il ritiro in negozio la spedizione è sempre gratis: lo scegli al passaggio successivo.</p>
+      <a class="bottone bottone--pieno bottone--largo" href="{{ url_for('shop.checkout') }}">Procedi all'acquisto</a>
+      <a class="link-freccia" href="{{ url_for('shop.catalogo') }}">Continua lo shopping</a>
+    </aside>
+  </div>
+  {% else %}
+    <div class="vuoto">
+      <svg class="icona icona--enorme" viewBox="0 0 24 24"><path d="M5 8h14l-1 13H6L5 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+      <h2 class="titolo">Il carrello è vuoto</h2>
+      <p>Dai un'occhiata alle novità di stagione: qualcosa ti aspetta.</p>
+      <a class="bottone bottone--pieno" href="{{ url_for('shop.catalogo', novita=1) }}">Scopri le novità</a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

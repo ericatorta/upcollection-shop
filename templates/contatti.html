@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block titolo %}Il negozio e i contatti{% endblock %}
+
+{% block contenuto %}
+<section class="negozio">
+  <div class="negozio__foto"><img src="https://upcollectiontorino.com/assets/img/hero/3.jpg" alt=""></div>
+  <div class="negozio__testo">
+    <p class="occhiello">Borgo San Paolo · Torino</p>
+    <h1 class="titolo titolo--grande">Vieni a<br><em>trovarci.</em></h1>
+    <p class="negozio__indirizzo"><a href="{{ negozio.mappa }}" target="_blank" rel="noopener">{{ negozio.indirizzo }} ↗</a></p>
+    <dl class="orari">
+      {% for giorno, ore in negozio.orari %}<div><dt>{{ giorno }}</dt><dd>{{ ore }}</dd></div>{% endfor %}
+    </dl>
+    <div class="bottoni">
+      <a class="bottone bottone--pieno" href="https://wa.me/{{ negozio.whatsapp }}" target="_blank" rel="noopener">Scrivici su WhatsApp</a>
+      <a class="bottone" href="tel:+39{{ negozio.telefono|replace(' ', '') }}">Chiama {{ negozio.telefono }}</a>
+    </div>
+  </div>
+</section>
+
+<section class="wrap pagina pagina--stretta">
+  <p class="occhiello">Preferisci scrivere?</p>
+  <h2 class="titolo">Mandaci un messaggio</h2>
+  <form method="post" class="modulo">
+    <div class="campi">
+      <label>Nome<input name="nome" required value="{{ request.form.get('nome', '') }}"></label>
+      <label>Email<input name="email" type="email" required value="{{ request.form.get('email', '') }}"></label>
+    </div>
+    <label>Argomento
+      <select name="oggetto">
+        {% for o in ['Disponibilità di un capo', 'Taglie e vestibilità', 'Il mio ordine', 'Resi e cambi', 'Altro'] %}
+          <option {% if request.form.get('oggetto') == o %}selected{% endif %}>{{ o }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Messaggio<textarea name="messaggio" rows="5" required>{{ request.form.get('messaggio', '') }}</textarea></label>
+    <button class="bottone bottone--pieno">Invia</button>
+  </form>
+</section>
+{% endblock %}

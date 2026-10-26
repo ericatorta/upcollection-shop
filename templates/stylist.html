@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block titolo %}La stylist{% endblock %}
+
+{% block contenuto %}
+<section class="wrap pagina pagina--stretta stylist">
+  <p class="occhiello">Assistente IA</p>
+  <h1 class="titolo titolo--grande">La stylist<br><em>di Up Collection.</em></h1>
+  <p class="muted">Raccontale l'occasione, il tuo stile o il budget: ti consiglia capi e abbinamenti dal nostro catalogo.</p>
+
+  <div class="idee">
+    {% for idea in ['Un regalo per lui sotto i 50 €', 'Look per una cena elegante', 'Un piumino caldo ma leggero', 'Cosa abbino a un pantalone gessato?'] %}
+      <form method="post"><button class="pillola" name="domanda" value="{{ idea }}">{{ idea }}</button></form>
+    {% endfor %}
+  </div>
+
+  {% if domanda %}
+    <div class="chat">
+      <div class="chat__tu">{{ domanda }}</div>
+      {% if risposta %}<div class="chat__lei">{{ risposta }}</div>{% endif %}
+    </div>
+  {% endif %}
+
+  <form method="post" class="stylist-banner__form">
+    <input name="domanda" placeholder="Scrivi la tua domanda…" required autofocus>
+    <button class="bottone bottone--pieno">Chiedi</button>
+  </form>
+  {% if not session.get('id_utenti') %}
+    <p class="muted piccolo">Per i consigli personalizzati <a class="sottolineato" href="{{ url_for('shop.login', next=url_for('shop.stylist')) }}">accedi</a> o <a class="sottolineato" href="{{ url_for('shop.registrati', next=url_for('shop.stylist')) }}">crea un account</a>.</p>
+  {% endif %}
+</section>
+{% endblock %}

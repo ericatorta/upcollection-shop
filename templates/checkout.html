@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block titolo %}Acquisto{% endblock %}
+
+{% block contenuto %}
+<section class="wrap pagina">
+  <p class="occhiello"><a href="{{ url_for('shop.carrello') }}">Carrello</a> / Acquisto</p>
+  <h1 class="titolo titolo--grande">Completa l'ordine</h1>
+
+  <form class="cassa" method="post">
+    <div class="modulo">
+      <fieldset>
+        <legend>1 · Come lo vuoi ricevere?</legend>
+        <div class="scelte">
+          <label class="scelta">
+            <input type="radio" name="consegna" value="spedizione" {% if request.form.get('consegna', 'spedizione') == 'spedizione' %}checked{% endif %}>
+            <span><strong>Spedizione a casa</strong><small>2-4 giorni lavorativi · {% if spedizione %}{{ spedizione|euro }}{% else %}gratis{% endif %}</small></span>
+          </label>
+          <label class="scelta">
+            <input type="radio" name="consegna" value="ritiro" {% if request.form.get('consegna') == 'ritiro' %}checked{% endif %}>
+            <span><strong>Ritiro in negozio</strong><small>{{ negozio.indirizzo }} · gratis</small></span>
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>2 · I tuoi dati</legend>
+        <div class="campi">
+          <label>Nome e cognome<input name="destinatario" required value="{{ request.form.get('destinatario', utente.nome ~ ' ' ~ utente.cognome) }}"></label>
+          <label>Telefono<input name="telefono" type="tel" required value="{{ request.form.get('telefono', '') }}" placeholder="Per avvisarti della consegna"></label>
+        </div>
+        <div class="campi solo-spedizione">
+          <label class="campo--largo">Indirizzo<input name="indirizzo" value="{{ request.form.get('indirizzo', '') }}" placeholder="Via e numero civico"></label>
+          <label>CAP<input name="cap" inputmode="numeric" maxlength="5" value="{{ request.form.get('cap', '') }}"></label>
+          <label>Città<input name="citta" value="{{ request.form.get('citta', '') }}"></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>3 · Pagamento</legend>
+        <div class="scelte">
+          {% for metodo in pagamenti %}
+            <label class="scelta">
+              <input type="radio" name="pagamento" value="{{ metodo }}" required {% if request.form.get('pagamento', pagamenti[0]) == metodo %}checked{% endif %}>
+              <span><strong>{{ metodo }}</strong></span>
+            </label>
+          {% endfor %}
+        </div>
+        <p class="muted piccolo">Sito dimostrativo: nessun pagamento viene addebitato.</p>
+      </fieldset>
+
+      <label class="campo--largo">Note per noi (facoltativo)
+        <textarea name="note" rows="3" placeholder="Un regalo? Lo incartiamo noi.">{{ request.form.get('note', '') }}</textarea>
+      </label>
+    </div>
+
+    <aside class="riepilogo">
+      <h2>Il tuo ordine</h2>
+      <ul class="mini-righe">
+        {% for r in righe %}
+          <li>
+            <img src="{{ r.prodotto.immagini.split(',')[0]|replace('.jpg', '-s.jpg') }}" alt="">
+            <span><strong>{{ r.prodotto.marca }}</strong> {{ r.prodotto.nome }}<small>{% if r.taglia %}Taglia {{ r.taglia }} · {% endif %}× {{ r.quantita }}</small></span>
+            <span>{{ r.totale_riga|euro }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+      <dl>
+        <div><dt>Subtotale</dt><dd>{{ subtotale|euro }}</dd></div>
+        <div><dt>Spedizione</dt><dd>{% if spedizione %}{{ spedizione|euro }} <small>(gratis col ritiro)</small>{% else %}Gratis{% endif %}</dd></div>
+        <div class="riepilogo__totale"><dt>Totale</dt><dd>{{ (subtotale + spedizione)|euro }}</dd></div>
+      </dl>
+      <button class="bottone bottone--pieno bottone--largo">Conferma l'ordine</button>
+    </aside>
+  </form>
+</section>
+{% endblock %}

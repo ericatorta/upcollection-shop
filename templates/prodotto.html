@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block titolo %}{{ p.nome }} {{ p.marca }}{% endblock %}
+{% block descrizione %}{{ p.marca }} – {{ p.nome }}, {{ p.prezzo|euro }}. Disponibile da Up Collection, Torino.{% endblock %}
+
+{% block contenuto %}
+{% set foto = p.immagini.split(',') %}
+{% set taglie = p.taglie.split(',') if p.taglie else [] %}
+
+<div class="scheda wrap">
+  <div class="scheda__foto">
+    {% for f in foto if f %}
+      <img src="{{ f }}" alt="{{ p.nome }} – foto {{ loop.index }}" {% if not loop.first %}loading="lazy"{% endif %}>
+    {% else %}
+      <div class="card__vuota">{{ p.marca }}</div>
+    {% endfor %}
+  </div>
+
+  <div class="scheda__info">
+    <div class="scheda__fissa">
+      <p class="occhiello"><a href="{{ url_for('shop.catalogo', categoria=p.categoria) }}">{{ p.categoria|capitalize }}</a> / <a href="{{ url_for('shop.catalogo', categoria=p.categoria, tipo=p.tipo) }}">{{ p.tipo }}</a></p>
+      <p class="scheda__marca"><a href="{{ url_for('shop.catalogo', marca=p.marca) }}">{{ p.marca }}</a></p>
+      <h1 class="scheda__nome">{{ p.nome }}</h1>
+      <p class="scheda__prezzo">{{ p.prezzo|euro }}</p>
+      {% if p.colore %}<p class="muted">Colore: <strong>{{ p.colore }}</strong></p>{% endif %}
+
+      <form class="scheda__form" action="{{ url_for('shop.carrello') }}" method="post">
+        <input type="hidden" name="id_prodotti" value="{{ p.id_prodotti }}">
+        {% if taglie %}
+          <fieldset class="taglie">
+            <legend>Taglia</legend>
+            {% for t in taglie %}
+              <label><input type="radio" name="taglia" value="{{ t }}" required {% if taglie|length == 1 %}checked{% endif %}><span>{{ t }}</span></label>
+            {% endfor %}
+          </fieldset>
+        {% endif %}
+        <div class="scheda__compra">
+          <label class="quantita">
+            <span class="sr">Quantità</span>
+            <input type="number" name="quantita" value="1" min="1" max="{{ p.quantita }}">
+          </label>
+          {% if p.quantita > 0 %}
+            <button class="bottone bottone--pieno">Aggiungi al carrello</button>
+          {% else %}
+            <button class="bottone" disabled>Esaurito online</button>
+          {% endif %}
+        </div>
+        {% if 0 < p.quantita <= 2 %}<p class="scorta">Ultimi {{ p.quantita }} pezzi disponibili</p>
+        {% elif p.quantita > 2 %}<p class="scorta scorta--ok">Disponibile · spedito in 24/48 ore</p>{% endif %}
+      </form>
+
+      <a class="whatsapp" target="_blank" rel="noopener"
+         href="https://wa.me/{{ negozio.whatsapp }}?text={{ ('Ciao Up Collection! Vorrei info su: ' ~ p.marca ~ ' – ' ~ p.nome)|urlencode }}">
+        <svg class="icona" viewBox="0 0 24 24"><path d="M20 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"/></svg>
+        Dubbi sulla taglia? Chiedici su WhatsApp
+      </a>
+
+      <details class="tendina" open>
+        <summary>Dettagli</summary>
+        <ul>
+          {% for punto in p.descrizione.splitlines() if punto.strip() %}<li>{{ punto }}</li>{% endfor %}
+        </ul>
+      </details>
+      <details class="tendina">
+        <summary>Spedizione e ritiro</summary>
+        <p>Spedizione gratuita sopra i {{ soglia_gratis }} € (altrimenti 7 €), consegna in 2-4 giorni lavorativi. Oppure ritiro gratuito in negozio, in {{ negozio.indirizzo }}.</p>
+      </details>
+      <details class="tendina">
+        <summary>Resi e cambi</summary>
+        <p>Hai 14 giorni per cambiare taglia o chiedere il rimborso. In negozio il cambio è immediato.</p>
+      </details>
+    </div>
+  </div>
+</div>
+
+{% if simili %}
+<section class="sezione wrap">
+  <div class="sezione__testa">
+    <div>
+      <p class="occhiello">Completa il look</p>
+      <h2 class="titolo">Potrebbe piacerti</h2>
+    </div>
+  </div>
+  <div class="griglia griglia--4">
+    {% for p in simili %}{% include "_card.html" %}{% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}

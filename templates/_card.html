@@ -1,0 +1,25 @@
+{# Card prodotto: usata in home, catalogo e "potrebbe piacerti". Si aspetta la variabile p. #}
+{% set foto = p.immagini.split(',') %}
+<article class="card">
+  <a class="card__foto" href="{{ url_for('shop.prodotto', id=p.id_prodotti) }}">
+    {% if foto[0] %}
+      <img src="{{ foto[0]|replace('.jpg', '-s.jpg') }}" alt="{{ p.nome }}" loading="lazy">
+      {% if foto|length > 1 %}
+        <img class="card__retro" src="{{ foto[1]|replace('.jpg', '-s.jpg') }}" alt="" loading="lazy">
+      {% endif %}
+    {% else %}
+      <span class="card__vuota">{{ p.marca }}</span>
+    {% endif %}
+    <span class="etichette">
+      {% if p.quantita == 0 %}<span class="etichetta etichetta--esaurito">Esaurito</span>
+      {% elif p.quantita <= 2 %}<span class="etichetta etichetta--ultimi">Ultimi pezzi</span>
+      {% elif p.novita %}<span class="etichetta">Novità</span>{% endif %}
+    </span>
+    <span class="card__vedi">Scopri</span>
+  </a>
+  <div class="card__testo">
+    <p class="card__marca">{{ p.marca }}</p>
+    <h3 class="card__nome"><a href="{{ url_for('shop.prodotto', id=p.id_prodotti) }}">{{ p.nome }}</a></h3>
+    <p class="card__prezzo">{{ p.prezzo|euro }}</p>
+  </div>
+</article>

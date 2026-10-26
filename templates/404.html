@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block titolo %}Pagina non trovata{% endblock %}
+
+{% block contenuto %}
+<section class="wrap pagina vuoto">
+  <p class="occhiello">Errore 404</p>
+  <h1 class="titolo titolo--grande">Questa pagina<br><em>è fuori stagione.</em></h1>
+  <p>Forse è stata spostata, o il capo non c'è più. Le novità però ti aspettano.</p>
+  <a class="bottone bottone--pieno" href="{{ url_for('shop.catalogo', novita=1) }}">Scopri le novità</a>
+</section>
+{% endblock %}

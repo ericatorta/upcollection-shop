@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titolo %}Abbigliamento uomo e donna a Torino{% endblock %} · Up Collection</title>
+  <meta name="description" content="{% block descrizione %}Up Collection, negozio di abbigliamento uomo e donna a Torino dagli anni '60: Liu Jo, Blauer, Armani Exchange, Sun68, Happy Socks e altri marchi. Spedizione o ritiro gratuito in negozio.{% endblock %}">
+  <link rel="icon" href="{{ url_for('static', filename='img/favicon.svg') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+
+  {% set utente_loggato = session.get('id_utenti') %}
+  {% set pezzi = session.get('carrello', {}).values()|sum %}
+
+  <div class="annuncio">
+    <div class="annuncio__scorre">
+      <span>Spedizione gratuita da {{ soglia_gratis }} €</span>
+      <span>Ritiro gratuito in negozio · Corso Racconigi 159D</span>
+      <span>Reso facile entro 14 giorni</span>
+      <span>Spedizione gratuita da {{ soglia_gratis }} €</span>
+      <span>Ritiro gratuito in negozio · Corso Racconigi 159D</span>
+      <span>Reso facile entro 14 giorni</span>
+    </div>
+  </div>
+
+  <header class="testata">
+    <div class="testata__riga wrap">
+      <details class="menu-mobile">
+        <summary aria-label="Menu"><span></span><span></span><span></span></summary>
+        <nav class="menu-mobile__pannello">
+          <a href="{{ url_for('shop.catalogo', novita=1) }}">Novità</a>
+          <a href="{{ url_for('shop.catalogo', categoria='donna') }}">Donna</a>
+          <a href="{{ url_for('shop.catalogo', categoria='uomo') }}">Uomo</a>
+          <a href="{{ url_for('shop.catalogo', tipo='Idee regalo') }}">Idee regalo</a>
+          <a href="{{ url_for('shop.stylist') }}">La stylist</a>
+          <a href="{{ url_for('shop.contatti') }}">Il negozio</a>
+        </nav>
+      </details>
+
+      <nav class="menu">
+        <a href="{{ url_for('shop.catalogo', novita=1) }}">Novità</a>
+        <a href="{{ url_for('shop.catalogo', categoria='donna') }}">Donna</a>
+        <a href="{{ url_for('shop.catalogo', categoria='uomo') }}">Uomo</a>
+        <a href="{{ url_for('shop.catalogo', tipo='Idee regalo') }}">Idee regalo</a>
+      </nav>
+
+      <a class="logo" href="{{ url_for('shop.index') }}" aria-label="Up Collection, home">
+        <svg viewBox="0 0 120 56" aria-hidden="true"><ellipse cx="60" cy="28" rx="57" ry="25" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+        <span class="logo__up">Up</span>
+        <span class="logo__collection">Collection</span>
+      </a>
+
+      <nav class="azioni">
+        <a class="azioni__testo" href="{{ url_for('shop.stylist') }}">La stylist</a>
+        <a class="azioni__testo" href="{{ url_for('shop.contatti') }}">Il negozio</a>
+        <a href="{{ url_for('shop.catalogo') }}#cerca" aria-label="Cerca">
+          <svg class="icona" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+        </a>
+        {% if utente_loggato %}
+          {% if session.get('ruolo') == 'admin' %}<a class="azioni__testo azioni__admin" href="{{ url_for('shop.admin') }}">Admin</a>{% endif %}
+          <a href="{{ url_for('shop.profilo') }}" aria-label="Il mio account">
+            <svg class="icona" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
+          </a>
+        {% else %}
+          <a href="{{ url_for('shop.login') }}" aria-label="Accedi">
+            <svg class="icona" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
+          </a>
+        {% endif %}
+        <a class="borsa" href="{{ url_for('shop.carrello') }}" aria-label="Carrello, {{ pezzi }} articoli">
+          <svg class="icona" viewBox="0 0 24 24"><path d="M5 8h14l-1 13H6L5 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+          {% if pezzi %}<span class="borsa__numero">{{ pezzi }}</span>{% endif %}
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  {% with messaggi = get_flashed_messages(with_categories=true) %}
+    {% if messaggi %}
+      <div class="avvisi">
+        {% for tipo, testo in messaggi %}
+          <div class="avviso avviso--{{ tipo }}" role="status">{{ testo }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <main>
+    {% block contenuto %}{% endblock %}
+  </main>
+
+  <section class="servizi">
+    <div class="wrap servizi__griglia">
+      <div>
+        <svg class="icona icona--grande" viewBox="0 0 24 24"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="17.5" r="1.5"/><circle cx="17" cy="17.5" r="1.5"/></svg>
+        <h3>Spedizione gratuita</h3>
+        <p>Sopra i {{ soglia_gratis }} €, in tutta Italia.</p>
+      </div>
+      <div>
+        <svg class="icona icona--grande" viewBox="0 0 24 24"><path d="M4 10 12 4l8 6v10H4z"/><path d="M10 20v-6h4v6"/></svg>
+        <h3>Ritira in negozio</h3>
+        <p>Gratis, a Borgo San Paolo. Lo provi prima di portarlo a casa.</p>
+      </div>
+      <div>
+        <svg class="icona icona--grande" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 3-6.2"/><path d="M4 4v4h4"/></svg>
+        <h3>Reso in 14 giorni</h3>
+        <p>Non ti convince? Lo cambi o te lo rimborsiamo.</p>
+      </div>
+      <div>
+        <svg class="icona icona--grande" viewBox="0 0 24 24"><path d="M20 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"/></svg>
+        <h3>Consigli veri</h3>
+        <p>Taglia o abbinamento? Scrivici su WhatsApp, come in negozio.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="piede">
+    <div class="wrap piede__griglia">
+      <div class="piede__marchio">
+        <p class="piede__logo">Up Collection</p>
+        <p>Abbigliamento uomo e donna a Torino, dagli anni '60. Tre generazioni, la stessa cura per ogni capo.</p>
+      </div>
+      <div>
+        <h4>Shop</h4>
+        <a href="{{ url_for('shop.catalogo', novita=1) }}">Novità</a>
+        <a href="{{ url_for('shop.catalogo', categoria='donna') }}">Donna</a>
+        <a href="{{ url_for('shop.catalogo', categoria='uomo') }}">Uomo</a>
+        <a href="{{ url_for('shop.catalogo', tipo='Idee regalo') }}">Idee regalo</a>
+      </div>
+      <div>
+        <h4>Aiuto</h4>
+        <a href="{{ url_for('shop.stylist') }}">La stylist</a>
+        <a href="{{ url_for('shop.contatti') }}">Contatti</a>
+        <a href="{{ url_for('shop.profilo') }}">Il mio account</a>
+        <a href="https://wa.me/{{ negozio.whatsapp }}" target="_blank" rel="noopener">WhatsApp</a>
+      </div>
+      <div>
+        <h4>Il negozio</h4>
+        <a href="{{ negozio.mappa }}" target="_blank" rel="noopener">{{ negozio.indirizzo }}</a>
+        <a href="tel:+39{{ negozio.telefono|replace(' ', '') }}">{{ negozio.telefono }}</a>
+        <a href="mailto:{{ negozio.email }}">{{ negozio.email }}</a>
+        <div class="social">
+          <a href="{{ negozio.instagram }}" target="_blank" rel="noopener">Instagram</a>
+          <a href="{{ negozio.facebook }}" target="_blank" rel="noopener">Facebook</a>
+          <a href="{{ negozio.tiktok }}" target="_blank" rel="noopener">TikTok</a>
+        </div>
+      </div>
+    </div>
+    <div class="wrap piede__fondo">
+      <span>© Up Collection di Torta Federico e C. s.a.s. · P.IVA 04924200019</span>
+      <span>Progetto dimostrativo: i pagamenti sono simulati.</span>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block titolo %}Crea un account{% endblock %}
+
+{% block contenuto %}
+<section class="accesso">
+  <div class="accesso__foto"><img src="https://upcollectiontorino.com/assets/img/hero/2.jpg" alt=""></div>
+  <div class="accesso__modulo">
+    <p class="occhiello">Benvenuta/o</p>
+    <h1 class="titolo titolo--grande">Crea il tuo account</h1>
+    <ul class="vantaggi">
+      <li>Segui i tuoi ordini</li>
+      <li>Acquisti più veloci</li>
+      <li>Consigli della stylist</li>
+    </ul>
+    <form method="post" class="modulo">
+      <div class="campi">
+        <label>Nome<input name="nome" required value="{{ request.form.get('nome', '') }}" autocomplete="given-name"></label>
+        <label>Cognome<input name="cognome" required value="{{ request.form.get('cognome', '') }}" autocomplete="family-name"></label>
+      </div>
+      <label>Email<input name="email" type="email" required value="{{ request.form.get('email', '') }}" autocomplete="email"></label>
+      <div class="campi">
+        <label>Username<input name="username" required minlength="3" value="{{ request.form.get('username', '') }}" autocomplete="username"></label>
+        <label>Password<input name="password" type="password" required minlength="6" autocomplete="new-password"></label>
+      </div>
+      <button class="bottone bottone--pieno bottone--largo">Crea account</button>
+    </form>
+    <p class="muted">Hai già un account? <a class="sottolineato" href="{{ url_for('shop.login', next=request.args.get('next', '')) }}">Accedi</a></p>
+  </div>
+</section>
+{% endblock %}
