@@ -66,8 +66,9 @@
       </ul>
       <dl>
         <div><dt>Subtotale</dt><dd>{{ subtotale|euro }}</dd></div>
-        <div><dt>Spedizione</dt><dd>{% if spedizione %}{{ spedizione|euro }} <small>(gratis col ritiro)</small>{% else %}Gratis{% endif %}</dd></div>
-        <div class="riepilogo__totale"><dt>Totale</dt><dd>{{ (subtotale + spedizione)|euro }}</dd></div>
+        {# due versioni dei numeri: il CSS mostra quella giusta in base a spedizione/ritiro #}
+        <div><dt>Spedizione</dt><dd><span class="se-spedizione">{% if spedizione %}{{ spedizione|euro }}{% else %}Gratis{% endif %}</span><span class="se-ritiro">0,00 € · ritiro in negozio</span></dd></div>
+        <div class="riepilogo__totale"><dt>Totale</dt><dd><span class="se-spedizione">{{ (subtotale + spedizione)|euro }}</span><span class="se-ritiro">{{ subtotale|euro }}</span></dd></div>
       </dl>
       <button class="bottone bottone--pieno bottone--largo">Conferma l'ordine</button>
     </aside>

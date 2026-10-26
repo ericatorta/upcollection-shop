@@ -149,11 +149,10 @@ p { margin: 0 0 1em; }
 .azioni__admin { color: var(--blu); }
 .azioni a:hover { color: var(--blu); }
 
-.logo { position: relative; display: grid; place-items: center; width: 132px; height: 58px; color: var(--blu); }
-.logo svg { position: absolute; inset: 0; width: 100%; height: 100%; transition: transform var(--lento); }
-.logo:hover svg { transform: rotate(-6deg) scale(1.04); }
-.logo__up { font-family: var(--serif); font-size: 26px; line-height: .8; margin-top: 4px; }
-.logo__collection { font-size: 7.5px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; margin-top: -14px; padding-left: .3em; }
+.logo { display: block; width: 190px; color: var(--blu); }
+.logo-svg { display: block; width: 100%; height: auto; }
+.logo-svg ellipse { transition: stroke-width var(--veloce); }
+.logo:hover .logo-svg ellipse { stroke-width: 5; }
 
 .borsa { position: relative; }
 .borsa__numero {
@@ -319,7 +318,7 @@ p { margin: 0 0 1em; }
 .piede h4 { color: #fff; font-size: 11px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; margin-bottom: 18px; }
 .piede a { display: block; padding: 4px 0; transition: color var(--veloce); }
 .piede a:hover { color: #fff; }
-.piede__logo { font-family: var(--serif); font-size: 38px; color: #fff; margin-bottom: 12px; }
+.piede__logo { width: 230px; color: #fff; margin-bottom: 18px; }
 .piede__marchio p:last-child { max-width: 320px; }
 .social { display: flex; gap: 16px; margin-top: 10px; }
 .social a { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; text-decoration: underline; text-underline-offset: 4px; }
@@ -460,7 +459,10 @@ p { margin: 0 0 1em; }
 .scelta input:checked + span { border-color: var(--blu); box-shadow: inset 0 0 0 1px var(--blu); }
 .scelta input:checked + span::before { border: 6px solid var(--blu); }
 .scelta input:focus-visible + span { outline: 2px solid var(--blu); outline-offset: 2px; }
-/* col ritiro in negozio l'indirizzo non serve: lo nascondo */
+/* col ritiro in negozio l'indirizzo non serve e la spedizione diventa 0 */
+.se-ritiro { display: none; }
+.cassa:has(input[value=ritiro]:checked) .se-spedizione { display: none; }
+.cassa:has(input[value=ritiro]:checked) .se-ritiro { display: inline; }
 .modulo:has(input[value=ritiro]:checked) .solo-spedizione { display: none; }
 .spunta { display: flex !important; align-items: center; gap: 10px !important; text-transform: none !important; letter-spacing: 0 !important; font-size: 15px !important; font-weight: 300 !important; }
 .spunta input { width: 18px; height: 18px; accent-color: var(--blu); }
@@ -561,9 +563,7 @@ a.numero:hover { background: var(--sabbia-scura); transform: translateY(-2px); }
   .menu-mobile { display: block; }
   .testata__riga { height: 66px; }
   .menu-mobile__pannello { top: 66px; }
-  .logo { width: 108px; height: 48px; }
-  .logo__up { font-size: 22px; }
-  .logo__collection { font-size: 7px; }
+  .logo { width: 140px; }
 
   .apertura__foto { grid-template-columns: 1fr; }
   .apertura__seconda { display: none; }

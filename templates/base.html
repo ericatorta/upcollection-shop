@@ -46,9 +46,7 @@
       </nav>
 
       <a class="logo" href="{{ url_for('shop.index') }}" aria-label="Up Collection, home">
-        <svg viewBox="0 0 120 56" aria-hidden="true"><ellipse cx="60" cy="28" rx="57" ry="25" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
-        <span class="logo__up">Up</span>
-        <span class="logo__collection">Collection</span>
+        {% include "_logo.html" %}
       </a>
 
       <nav class="azioni">
@@ -117,7 +115,7 @@
   <footer class="piede">
     <div class="wrap piede__griglia">
       <div class="piede__marchio">
-        <p class="piede__logo">Up Collection</p>
+        <p class="piede__logo">{% include "_logo.html" %}</p>
         <p>Abbigliamento uomo e donna a Torino, dagli anni '60. Tre generazioni, la stessa cura per ogni capo.</p>
       </div>
       <div>
