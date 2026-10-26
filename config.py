@@ -18,6 +18,8 @@ class Config:
 
     # Facoltativa: serve solo alla stylist IA
     GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+    # i modelli di Groq cambiano: se questo sparisce, mettine un altro in .env
+    GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
 
     # Spedizione: gratis sopra la soglia, ritiro in negozio sempre gratis
     SOGLIA_SPEDIZIONE_GRATIS = 99

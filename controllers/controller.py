@@ -498,19 +498,23 @@ def stylist():
                     from groq import Groq
                     client = Groq(api_key=current_app.config["GROQ_API_KEY"])
                     risultato = client.chat.completions.create(
-                        model="llama-3.3-70b-versatile",
+                        model=current_app.config["GROQ_MODEL"],
                         messages=[
                             {"role": "system", "content": (
                                 "Sei la stylist di Up Collection, negozio di abbigliamento uomo e donna "
-                                "a Torino dagli anni '60. Rispondi in italiano, con tono caldo e breve "
-                                "(massimo 5 frasi). Consiglia da 1 a 4 capi SOLO di questo catalogo: "
-                                "per ognuno scrivi il nome seguito dal suo codice, per esempio "
-                                "\"Piumino Lyne [#12]\". Non inventare capi e non dire di aver fatto "
-                                "acquisti o modifiche.\n\nCatalogo:\n" + catalogo)},
+                                "a Torino dagli anni '60. Rispondi in italiano come una commessa esperta "
+                                "e simpatica: una frase di apertura, poi da 1 a 4 capi SOLO di questo "
+                                "catalogo, uno per riga, nel formato \"Nome del capo [#12] – perché è "
+                                "adatto\" (mezza frase). Chiudi con una breve frase. Non scrivere i "
+                                "prezzi (li mostriamo nelle schede), non usare grassetto o simboli "
+                                "markdown, non inventare capi e non dire di aver fatto acquisti."
+                                "\n\nCatalogo:\n" + catalogo)},
                             {"role": "user", "content": domanda},
                         ],
                         temperature=0.5,
-                        max_tokens=400,
+                        # gpt-oss "ragiona" prima di rispondere: poco ragionamento, più spazio
+                        reasoning_effort="low",
+                        max_tokens=1200,
                     )
                     testo = risultato.choices[0].message.content
                     ids = [int(n) for n in re.findall(r"\[#(\d+)\]", testo)]

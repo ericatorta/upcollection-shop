@@ -70,7 +70,7 @@ Sono account dimostrativi: prima di andare online cambiali.
 
 - Le foto dei prodotti non sono nel repository: vengono caricate dal sito del negozio, [upcollectiontorino.com](https://upcollectiontorino.com).
 - I pagamenti sono simulati: nessun addebito reale.
-- La stylist funziona anche senza chiave: capisce per chi è, che capo, marca e budget e cerca nel catalogo. Con `GROQ_API_KEY` risponde il modello `llama-3.3-70b-versatile`.
+- La stylist funziona anche senza chiave: capisce per chi è, che capo, marca e budget e cerca nel catalogo. Con `GROQ_API_KEY` risponde il modello `openai/gpt-oss-120b` (si cambia con `GROQ_MODEL`).
 
 ---
 
