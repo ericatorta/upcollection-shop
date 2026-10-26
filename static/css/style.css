@@ -499,8 +499,13 @@ p { margin: 0 0 1em; }
 
 /* ---------- accesso ---------- */
 .accesso { display: grid; grid-template-columns: 1fr 1fr; min-height: min(calc(100svh - 112px), 860px); }
-.accesso__foto { overflow: hidden; background: var(--sabbia); }
-.accesso__foto img { width: 100%; height: 100%; object-fit: cover; object-position: center 20%; }
+.accesso__marchio {
+  display: grid; place-content: center; justify-items: center; gap: 22px; padding: 40px;
+  background: var(--blu); color: #fff; text-align: center;
+  background-image: radial-gradient(circle at 80% 15%, rgba(255, 255, 255, .12), transparent 50%);
+}
+.accesso__logo { width: min(440px, 70vw); animation: sali 1s var(--lento) both; }
+.accesso__marchio p { margin: 0; font-size: 11px; font-weight: 500; letter-spacing: .22em; text-transform: uppercase; color: rgba(255, 255, 255, .75); }
 .accesso__modulo { align-self: center; width: 100%; max-width: 520px; padding: 60px var(--gutter); margin: 0 auto; }
 .accesso__modulo .modulo { margin: 26px 0 22px; }
 .vantaggi { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; color: var(--grigio); }
@@ -593,7 +598,8 @@ a.numero:hover { background: var(--sabbia-scura); transform: translateY(-2px); }
   .apertura__foto { grid-template-columns: 1fr; }
   .apertura__seconda { display: none; }
   .scheda, .cassa, .profilo, .storia__griglia, .stylist-banner, .negozio, .accesso { grid-template-columns: 1fr; }
-  .accesso__foto { height: 34vh; }
+  .accesso__marchio { padding: 44px 20px; }
+  .accesso__logo { width: min(260px, 70vw); }
   .scheda__foto { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 6px; margin-inline: calc(var(--gutter) * -1); scrollbar-width: none; }
   .scheda__foto img { flex: 0 0 86%; scroll-snap-align: center; }
   .scheda__fissa, .riepilogo { position: static; }
