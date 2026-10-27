@@ -1,0 +1,16 @@
+# Render (https://render.com): New → Blueprint → scegli questo repository
+services:
+  - type: web
+    name: upcollection-shop
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: SECRET_KEY
+        generateValue: true
+      # facoltativa: serve solo alla stylist IA (la chiedo a Render al primo avvio)
+      - key: GROQ_API_KEY
+        sync: false
