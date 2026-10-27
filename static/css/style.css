@@ -500,6 +500,12 @@ p { margin: 0 0 1em; }
 .cassa:has(input[value=ritiro]:checked) .se-spedizione { display: none; }
 .cassa:has(input[value=ritiro]:checked) .se-ritiro { display: inline; }
 .modulo:has(input[value=ritiro]:checked) .solo-spedizione { display: none; }
+/* pagamenti: in negozio solo col ritiro, contrassegno solo con la spedizione */
+.cassa:has(input[value=ritiro]:checked) .scelta--spedizione,
+.cassa:not(:has(input[value=ritiro]:checked)) .scelta--ritiro { display: none; }
+.riepilogo .accetto { display: flex; gap: 10px; align-items: flex-start; margin: 18px 0 14px; font-size: 13px; font-weight: 300; line-height: 1.5; text-transform: none; letter-spacing: 0; cursor: pointer; }
+.riepilogo .accetto input { width: auto; flex: none; margin-top: 3px; accent-color: var(--blu); }
+.riepilogo .accetto a { text-decoration: underline; }
 .spunta { display: flex !important; align-items: center; gap: 10px !important; text-transform: none !important; letter-spacing: 0 !important; font-size: 15px !important; font-weight: 300 !important; }
 .spunta input { width: 18px; height: 18px; accent-color: var(--blu); }
 
@@ -536,7 +542,7 @@ a.tabella__riga:hover { background: var(--sabbia); }
 .tabella__azioni { display: flex; gap: 14px; font-weight: 300 !important; }
 
 .stato { justify-self: start; padding: 5px 10px; border-radius: 99px; font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; background: var(--blu-chiaro); color: var(--blu); white-space: nowrap; }
-.stato--in-preparazione { background: #fbf0dc; color: var(--ambra); }
+.stato--da-confermare, .stato--in-attesa-di-pagamento { background: #fbf0dc; color: var(--ambra); }
 .stato--spedito, .stato--pronto-per-il-ritiro { background: #e3efe8; color: var(--verde); }
 .stato--consegnato { background: var(--inchiostro); color: #fff; }
 .stato--annullato { background: #f6e1df; color: var(--rosso); }
@@ -651,3 +657,12 @@ a.numero:hover { background: var(--sabbia-scura); transform: translateY(-2px); }
   .marchi__scorre { animation: scorri 90s linear infinite !important; }
 }
 .pagina--media { max-width: 1000px; }
+
+/* ---------- pagine legali e istruzioni di pagamento ---------- */
+.legale { max-width: 760px; }
+.legale h2 { font-family: var(--serif); font-weight: 400; font-size: 26px; margin: 38px 0 10px; }
+.legale p, .legale li { line-height: 1.7; }
+.legale a { text-decoration: underline; }
+.istruzioni { margin: 26px 0; padding: 20px 22px; border: 1px solid var(--blu); background: var(--blu-chiaro); line-height: 1.6; }
+.istruzioni strong { display: block; margin-bottom: 4px; color: var(--blu); }
+.azioni-ordine { display: grid; gap: 8px; margin-top: 18px; }

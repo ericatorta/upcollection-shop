@@ -7,11 +7,14 @@
   <p class="occhiello">Ordine n. {{ ordine.id_ordini }}</p>
   <h1 class="titolo titolo--grande">Grazie, <em>{{ ordine.destinatario.split(' ')[0] }}</em>.</h1>
   <p>
+    Abbiamo ricevuto il tuo ordine. Controlliamo che sia tutto disponibile e te lo <strong>confermiamo al più presto</strong>,
+    di solito in giornata, all'indirizzo {{ ordine.email }}.
     {% if ordine.consegna == 'ritiro' %}
-      Ti chiamiamo al {{ ordine.telefono }} quando è pronto: lo trovi in {{ negozio.indirizzo }}.
+      Poi ti avvisiamo quando è pronto in {{ negozio.indirizzo }}.
     {% else %}
-      Lo prepariamo con cura e lo spediamo a {{ ordine.indirizzo }}, {{ ordine.cap }} {{ ordine.citta }}.
+      Poi lo spediamo a {{ ordine.indirizzo }}, {{ ordine.cap }} {{ ordine.citta }}.
     {% endif %}
+    {% if istruzioni %}Con la conferma ti mandiamo anche come pagare con {{ ordine.pagamento }}.{% endif %}
   </p>
   <ul class="mini-righe mini-righe--centro">
     {% for r in righe %}

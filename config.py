@@ -21,9 +21,44 @@ class Config:
     # i modelli di Groq cambiano: se questo sparisce, mettine un altro in .env
     GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
 
+    # Indirizzo pubblico del sito (serve per i link nelle email e su Telegram)
+    SITO_URL = os.getenv("SITO_URL", "http://localhost:5065").rstrip("/")
+
+    # Password dell'admin creata al primo avvio. In produzione va messa nel .env:
+    # senza, il sito crea gli account di prova (admin/Admin123! e cliente/Cliente123!)
+    ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "")
+
     # Spedizione: gratis sopra la soglia, ritiro in negozio sempre gratis
     SOGLIA_SPEDIZIONE_GRATIS = 99
     COSTO_SPEDIZIONE = 7
+    # supplemento del corriere per il pagamento alla consegna
+    COSTO_CONTRASSEGNO = float(os.getenv("COSTO_CONTRASSEGNO", "0"))
+
+    # Pagamenti dopo la conferma: dati per bonifico e Satispay
+    IBAN = os.getenv("IBAN", "")
+    INTESTATARIO = os.getenv("INTESTATARIO", "Up Collection di Torta Federico e C. s.a.s.")
+    SATISPAY_NOME = os.getenv("SATISPAY_NOME", "Up Collection")
+
+    # Telegram: il bot avvisa di ogni ordine con i pulsanti Conferma / Rifiuta
+    TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "")
+    TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
+    # parte segreta dell'indirizzo del webhook: solo Telegram la conosce
+    TELEGRAM_SEGRETO = os.getenv("TELEGRAM_SEGRETO", "")
+
+    # Email ai clienti (conferma, pagamento, spedizione). Facoltative: senza, non parte nessuna email
+    SMTP_HOST = os.getenv("SMTP_HOST", "")
+    SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+    SMTP_UTENTE = os.getenv("SMTP_UTENTE", "")
+    SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
+    EMAIL_MITTENTE = os.getenv("EMAIL_MITTENTE", "Up Collection <info@upcollectiontorino.com>")
+
+    # Dati obbligatori del venditore (footer, condizioni di vendita)
+    DATI_LEGALI = {
+        "ragione_sociale": "Up Collection di Torta Federico e C. s.a.s.",
+        "sede": "Corso Racconigi 159/D, 10141 Torino (TO)",
+        "piva": "04924200019",
+        "rea": "TO-670774",
+    }
 
     # Loghi dei marchi nella fascia che scorre in home: file in static/img/marchi
     # e "scala" (stessa superficie per tutti: i loghi lunghi più bassi, quelli quadrati più alti)

@@ -81,7 +81,7 @@ def crea_database():
                 id_ordini INTEGER PRIMARY KEY AUTOINCREMENT,
                 id_utenti INTEGER NOT NULL,
                 data TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                stato TEXT NOT NULL DEFAULT 'ricevuto',
+                stato TEXT NOT NULL DEFAULT 'da confermare',
                 destinatario TEXT NOT NULL,
                 telefono TEXT NOT NULL,
                 consegna TEXT NOT NULL,
@@ -121,7 +121,13 @@ def crea_database():
             )
         """)
 
-        # primo avvio: account di prova (da cambiare prima di andare online)
+        # primo avvio online: solo l'admin, con la password scelta nel .env
+        if conn.execute("SELECT COUNT(*) FROM utenti").fetchone()[0] == 0 and Config.ADMIN_PASSWORD:
+            conn.execute("""
+                INSERT INTO utenti (username, password, nome, cognome, email, ruolo)
+                VALUES ('admin', ?, 'Federico', 'Torta', 'info@upcollectiontorino.com', 'admin')
+            """, (generate_password_hash(Config.ADMIN_PASSWORD),))
+        # primo avvio in locale: account di prova
         if conn.execute("SELECT COUNT(*) FROM utenti").fetchone()[0] == 0:
             conn.executemany("""
                 INSERT INTO utenti (username, password, nome, cognome, email, ruolo)
@@ -437,6 +443,29 @@ def leggi_righe_ordine(id_ordini):
         """, (id_ordini,)).fetchall()
 
 
+def annulla_ordine(id):
+    """Ordine annullato: i capi tornano disponibili, tutto in una transazione."""
+    with db_connection() as conn:
+        stato = conn.execute("""
+            SELECT stato FROM ordini WHERE id_ordini = ?
+        """, (id,)).fetchone()
+        if not stato or stato["stato"] == "annullato":
+            return
+        conn.execute("""
+            UPDATE prodotti
+            SET quantita = quantita + (
+                SELECT SUM(righe_ordine.quantita) FROM righe_ordine
+                WHERE righe_ordine.id_ordini = ? AND righe_ordine.id_prodotti = prodotti.id_prodotti
+            )
+            WHERE id_prodotti IN (
+                SELECT id_prodotti FROM righe_ordine WHERE id_ordini = ?
+            )
+        """, (id, id))
+        conn.execute("""
+            UPDATE ordini SET stato = 'annullato' WHERE id_ordini = ?
+        """, (id,))
+
+
 def modifica_stato_ordine(id, stato):
     with db_connection() as conn:
         conn.execute("""
@@ -453,7 +482,7 @@ def statistiche():
                 SELECT COALESCE(SUM(totale), 0) FROM ordini WHERE stato != 'annullato'
             """).fetchone()[0],
             "da_preparare": conn.execute("""
-                SELECT COUNT(*) FROM ordini WHERE stato = 'ricevuto'
+                SELECT COUNT(*) FROM ordini WHERE stato = 'da confermare'
             """).fetchone()[0],
             "clienti": conn.execute("""
                 SELECT COUNT(*) FROM utenti WHERE ruolo = 'cliente'

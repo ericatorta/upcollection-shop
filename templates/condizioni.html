@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block titolo %}Condizioni di vendita{% endblock %}
+
+{% block contenuto %}
+<section class="wrap pagina legale">
+  <p class="occhiello">Informazioni legali</p>
+  <h1 class="titolo titolo--grande">Condizioni di vendita</h1>
+
+  <h2>1. Chi vende</h2>
+  <p>{{ legali.ragione_sociale }}, sede in {{ legali.sede }}, P.IVA {{ legali.piva }}, REA {{ legali.rea }}.
+    Email <a href="mailto:{{ negozio.email }}">{{ negozio.email }}</a>, telefono {{ negozio.telefono }}.</p>
+
+  <h2>2. Prodotti e prezzi</h2>
+  <p>I prezzi sono in euro e comprendono l'IVA. Le foto mostrano il capo il più fedelmente possibile;
+    piccole differenze di colore dipendono dallo schermo. Il costo della spedizione è indicato prima di confermare l'ordine.</p>
+
+  <h2>3. Come si conclude l'ordine</h2>
+  <p>Quando invii l'ordine ci fai una proposta d'acquisto: controlliamo che i capi siano disponibili
+    e ti mandiamo la conferma. Il contratto è concluso con la nostra conferma. Se un capo non è più
+    disponibile ti avvisiamo e, se avevi già pagato, ti rimborsiamo per intero.</p>
+
+  <h2>4. Pagamento</h2>
+  <ul>
+    <li><strong>In negozio</strong>, al ritiro: contanti, carta o bancomat.</li>
+    <li><strong>Contrassegno</strong>: in contanti al corriere{% if config.COSTO_CONTRASSEGNO %}, con un supplemento di {{ config.COSTO_CONTRASSEGNO|euro }}{% endif %}.</li>
+    <li><strong>Bonifico</strong> o <strong>Satispay</strong>: dopo la nostra conferma, con le istruzioni che ricevi. Prepariamo l'ordine quando il pagamento arriva; se non arriva entro 5 giorni l'ordine viene annullato.</li>
+  </ul>
+
+  <h2>5. Spedizione e ritiro</h2>
+  <p>Spediamo in Italia in 2-4 giorni lavorativi dalla conferma (o dal pagamento). La spedizione costa
+    {{ config.COSTO_SPEDIZIONE|euro }} ed è gratuita sopra i {{ soglia_gratis }} €. Il ritiro in negozio è sempre gratuito:
+    ti avvisiamo quando l'ordine è pronto.</p>
+
+  <h2>6. Diritto di recesso (reso)</h2>
+  <p>Puoi restituire i capi entro <strong>14 giorni</strong> dal giorno in cui li ricevi, senza dover dare spiegazioni
+    (artt. 52 e seguenti del Codice del Consumo). Scrivici a <a href="mailto:{{ negozio.email }}">{{ negozio.email }}</a>
+    o su WhatsApp indicando il numero d'ordine, poi riporta i capi in negozio o spediscili entro 14 giorni
+    dalla tua comunicazione. I capi devono essere integri, non indossati e con le etichette.</p>
+  <p>Il costo della spedizione di ritorno è a tuo carico; il reso in negozio è gratuito.
+    Ti rimborsiamo entro 14 giorni con lo stesso metodo di pagamento (per il contrassegno, con bonifico),
+    compresa la spedizione iniziale standard. Possiamo aspettare di ricevere i capi prima di rimborsare.
+    Se preferisci, invece del rimborso puoi cambiare il capo.</p>
+
+  <h2>7. Garanzia</h2>
+  <p>Tutti i prodotti hanno la garanzia legale di conformità di 2 anni dalla consegna
+    (artt. 128 e seguenti del Codice del Consumo). Se un capo ha un difetto scrivici: lo sostituiamo o ti rimborsiamo.</p>
+
+  <h2>8. Reclami e legge applicabile</h2>
+  <p>Per qualsiasi problema scrivici: rispondiamo entro pochi giorni. Il contratto è regolato dalla legge italiana;
+    per le controversie è competente il giudice del luogo dove abiti.</p>
+
+  <p class="muted piccolo">Ultimo aggiornamento: ottobre 2026.</p>
+</section>
+{% endblock %}

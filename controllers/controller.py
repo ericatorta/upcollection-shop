@@ -7,9 +7,10 @@ CONTROLLER: tutte le route del negozio (Blueprint "shop").
     contatti     modulo pubblico + stylist IA (Groq)
     admin        dashboard, prodotti (CRUD), ordini, messaggi
 """
+import hmac
 import re
 from functools import wraps
-from flask import Blueprint, current_app, flash, redirect, render_template, request, session, url_for
+from flask import Blueprint, abort, current_app, flash, redirect, render_template, request, session, url_for
 from models.database import (
     registra_utente,
     login_utente,
@@ -31,7 +32,6 @@ from models.database import (
     leggi_ordini,
     trova_ordine,
     leggi_righe_ordine,
-    modifica_stato_ordine,
     statistiche,
     inserisci_messaggio,
     leggi_messaggi,
@@ -39,11 +39,21 @@ from models.database import (
     cerca_per_stylist,
     trova_prodotti,
 )
+from services import telegram
+from services.email import istruzioni_pagamento
+from services.ordini import (
+    AZIONI,
+    PAGAMENTI,
+    STATI_ORDINE,
+    azioni_possibili,
+    cambia_stato,
+    esegui,
+    nuovo_ordine,
+    pagamenti_validi,
+)
 
 shop = Blueprint("shop", __name__)
 
-STATI_ORDINE = ["ricevuto", "in preparazione", "spedito", "pronto per il ritiro", "consegnato", "annullato"]
-PAGAMENTI = ["Paga in negozio al ritiro", "Contrassegno", "Carta (simulato)"]
 
 
 # DECORATOR
@@ -108,11 +118,14 @@ def pagina_successiva(predefinita):
     return predefinita
 
 
-def costo_spedizione(subtotale, consegna):
-    """Ritiro in negozio gratis; spedizione gratis sopra la soglia."""
-    if consegna == "ritiro" or subtotale >= current_app.config["SOGLIA_SPEDIZIONE_GRATIS"]:
+def costo_spedizione(subtotale, consegna, pagamento=""):
+    """Ritiro in negozio gratis; spedizione gratis sopra la soglia; il contrassegno ha il suo supplemento."""
+    if consegna == "ritiro":
         return 0
-    return current_app.config["COSTO_SPEDIZIONE"]
+    costo = 0 if subtotale >= current_app.config["SOGLIA_SPEDIZIONE_GRATIS"] else current_app.config["COSTO_SPEDIZIONE"]
+    if pagamento == "Contrassegno":
+        costo += current_app.config["COSTO_CONTRASSEGNO"]
+    return costo
 
 
 # VETRINA
@@ -236,20 +249,25 @@ def checkout():
         citta = request.form.get("citta", "").strip()
         pagamento = request.form.get("pagamento", "")
         note = request.form.get("note", "").strip()
-        if not destinatario or not telefono or pagamento not in PAGAMENTI:
-            flash("Compila nome, telefono e metodo di pagamento.", "error")
+        if consegna not in ("spedizione", "ritiro"):
+            consegna = "spedizione"
+        if not destinatario or not telefono or pagamento not in pagamenti_validi(consegna):
+            flash("Compila nome, telefono e un metodo di pagamento valido per la consegna scelta.", "error")
         elif consegna == "spedizione" and (not indirizzo or not cap or not citta):
             flash("Per la spedizione servono indirizzo, CAP e città.", "error")
+        elif not request.form.get("condizioni"):
+            flash("Per ordinare devi accettare le condizioni di vendita.", "error")
         else:
             try:
                 id_ordine = crea_ordine(
                     utente["id_utenti"], destinatario, telefono, consegna,
                     indirizzo, cap, citta, pagamento, note,
-                    costo_spedizione(subtotale, consegna),
+                    costo_spedizione(subtotale, consegna, pagamento),
                     [{"id": r["prodotto"]["id_prodotti"], "taglia": r["taglia"],
                       "quantita": r["quantita"]} for r in righe],
                 )
                 session["carrello"] = {}
+                nuovo_ordine(id_ordine)  # Telegram al negozio + email al cliente
                 return redirect(url_for("shop.grazie", id=id_ordine))
             except ValueError:
                 flash("Un capo nel carrello non è più disponibile in quella quantità.", "error")
@@ -262,6 +280,7 @@ def checkout():
         subtotale=subtotale,
         spedizione=costo_spedizione(subtotale, "spedizione"),
         pagamenti=PAGAMENTI,
+        costo_contrassegno=current_app.config["COSTO_CONTRASSEGNO"],
     )
 
 
@@ -271,7 +290,8 @@ def grazie(id):
     ordine = trova_ordine(id)
     if not ordine or ordine["id_utenti"] != session["id_utenti"]:
         return redirect(url_for("shop.ordini"))
-    return render_template("grazie.html", ordine=ordine, righe=leggi_righe_ordine(id))
+    return render_template("grazie.html", ordine=ordine, righe=leggi_righe_ordine(id),
+                           istruzioni=istruzioni_pagamento(ordine))
 
 
 # ACCOUNT
@@ -364,10 +384,24 @@ def scheda_ordine(id):
         flash("Ordine non trovato.", "error")
         return redirect(url_for("shop.profilo"))
     return render_template("scheda_ordine.html", ordine=ordine,
-                           righe=leggi_righe_ordine(id), stati=STATI_ORDINE)
+                           righe=leggi_righe_ordine(id), stati=STATI_ORDINE,
+                           azioni=azioni_possibili(ordine), etichette=AZIONI,
+                           istruzioni=istruzioni_pagamento(ordine))
 
 
 # CONTATTI E STYLIST IA
+
+# PAGINE LEGALI
+
+@shop.route("/condizioni-di-vendita")
+def condizioni():
+    return render_template("condizioni.html", legali=current_app.config["DATI_LEGALI"])
+
+
+@shop.route("/privacy")
+def privacy():
+    return render_template("privacy.html", legali=current_app.config["DATI_LEGALI"])
+
 
 @shop.route("/contatti", methods=["GET", "POST"])
 def contatti():
@@ -643,10 +677,58 @@ def admin_ordini():
 @role_required("admin")
 def cambia_stato_ordine(id):
     stato = request.form.get("stato", "")
-    if stato in STATI_ORDINE and trova_ordine(id):
-        modifica_stato_ordine(id, stato)
+    if cambia_stato(id, stato):
         flash("Ordine #" + str(id) + ": " + stato + ".", "success")
     return redirect(url_for("shop.scheda_ordine", id=id))
+
+
+@shop.route("/admin/ordini/<int:id>/<azione>", methods=["POST"])
+@role_required("admin")
+def azione_ordine(id, azione):
+    """Gli stessi pulsanti di Telegram, nella pagina dell'ordine."""
+    ordine = esegui(id, azione)
+    if ordine:
+        flash("Ordine #" + str(id) + ": " + ordine["stato"] + ".", "success")
+    else:
+        flash("Azione non possibile per questo ordine.", "error")
+    return redirect(url_for("shop.scheda_ordine", id=id))
+
+
+# TELEGRAM: i tocchi sui pulsanti del bot arrivano qui
+
+@shop.route("/telegram/<segreto>", methods=["POST"])
+def telegram_webhook(segreto):
+    atteso = current_app.config["TELEGRAM_SEGRETO"]
+    if not atteso or not hmac.compare_digest(segreto, atteso):
+        abort(404)
+    dati = request.get_json(silent=True) or {}
+    chat_negozio = str(current_app.config["TELEGRAM_CHAT_ID"])
+
+    # un messaggio scritto al bot (es. /start): rispondo con il numero della chat
+    if "message" in dati:
+        chat = str(dati["message"]["chat"]["id"])
+        if chat != chat_negozio:
+            telegram.scrivi(chat, "Ciao! Questo è il bot ordini di Up Collection. Codice chat: " + chat)
+        return "ok"
+
+    tocco = dati.get("callback_query")
+    if not tocco:
+        return "ok"
+    messaggio = tocco.get("message") or {}
+    chat = str(messaggio.get("chat", {}).get("id", ""))
+    # solo la chat del negozio può confermare o rifiutare
+    if chat != chat_negozio:
+        telegram.rispondi_tocco(tocco["id"], "Non autorizzato.")
+        return "ok"
+    azione, _, id_testo = tocco.get("data", "").partition(":")
+    ordine = esegui(int(id_testo), azione) if id_testo.isdigit() else None
+    if ordine:
+        telegram.rispondi_tocco(tocco["id"], "Ordine #" + id_testo + ": " + ordine["stato"])
+        telegram.aggiorna_messaggio(chat, messaggio["message_id"], ordine,
+                                    leggi_righe_ordine(ordine["id_ordini"]), azioni_possibili(ordine))
+    else:
+        telegram.rispondi_tocco(tocco["id"], "Già fatto o non più possibile.")
+    return "ok"
 
 
 @shop.route("/admin/messaggi")

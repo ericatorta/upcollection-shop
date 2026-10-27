@@ -21,14 +21,17 @@ Scritto in **Python + Flask** con architettura **MVC**, database **SQLite** e un
 - Catalogo con filtri (reparto, tipo, marchio), ricerca e ordinamento per prezzo
 - Scheda prodotto con galleria, scelta taglia, disponibilità e link WhatsApp
 - Carrello in sessione (anche senza account), barra "spedizione gratuita da 99 €"
-- Checkout con spedizione o ritiro gratuito in negozio, pagamento simulato
+- Checkout con spedizione o ritiro gratuito in negozio; pagamento in negozio, contrassegno, bonifico o Satispay
+- Ogni ordine va prima **confermato dal negozio**: il cliente non paga finché i capi non sono controllati
 - Account: registrazione, login, profilo, storico ordini con stato di avanzamento
 - Stylist IA: consiglia capi e abbinamenti *solo* dal catalogo reale, con le card dei prodotti sotto la risposta; aperta a tutti (5 domande gratis senza account)
 
 **Per il negozio (admin)**
 - Dashboard: incasso, ordini da preparare, clienti, scorte basse
 - Prodotti: aggiungi, modifica, elimina (gli ordini passati restano nello storico)
-- Ordini: filtro per stato e cambio stato (ricevuto → in preparazione → spedito/pronto → consegnato)
+- Ordini: da confermare → (in attesa di pagamento) → confermato → spedito/pronto per il ritiro → consegnato; se un ordine viene annullato i capi tornano disponibili
+- **Bot Telegram**: a ogni ordine arriva un messaggio con i pulsanti Conferma / Rifiuta, poi Pagato, Spedito, Consegnato
+- Email automatica al cliente a ogni cambio di stato (se è configurato un server SMTP)
 - Messaggi arrivati dal modulo contatti
 
 ## Struttura
@@ -39,6 +42,10 @@ config.py                   chiave segreta, database, Groq, dati del negozio
 models/database.py          tutte le query SQL (il controller non scrive SQL)
 models/prodotti_demo.py     catalogo di esempio caricato al primo avvio
 controllers/controller.py   tutte le route (Blueprint "shop") + decorator login/ruolo
+services/ordini.py          stati e pagamenti, passaggi da uno stato all'altro
+services/telegram.py        avvisi al negozio e pulsanti del bot
+services/email.py           email al cliente
+strumenti/telegram_setup.py collega il bot Telegram al sito
 templates/                  pagine Jinja (base + pagine + admin/)
 static/                     CSS, font, icona
 ```
@@ -67,12 +74,11 @@ Poi apri http://127.0.0.1:5000. Al primo avvio vengono creati il database e due 
 | admin   | `admin`   | `Admin123!`   |
 | cliente | `cliente` | `Cliente123!` |
 
-Sono account dimostrativi: prima di andare online cambiali.
+Online invece, con `ADMIN_PASSWORD` nel `.env`, viene creato solo l'admin con quella password.
 
 ## Note
 
 - Le foto dei prodotti non sono nel repository: vengono caricate dal sito del negozio, [upcollectiontorino.com](https://upcollectiontorino.com).
-- I pagamenti sono simulati: nessun addebito reale.
 - La stylist funziona anche senza chiave: capisce per chi è, che capo, marca e budget e cerca nel catalogo. Con `GROQ_API_KEY` risponde il modello `openai/gpt-oss-120b` (si cambia con `GROQ_MODEL`).
 
 ---

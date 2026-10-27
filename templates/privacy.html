@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block titolo %}Privacy e cookie{% endblock %}
+
+{% block contenuto %}
+<section class="wrap pagina legale">
+  <p class="occhiello">Informazioni legali</p>
+  <h1 class="titolo titolo--grande">Privacy e cookie</h1>
+
+  <h2>Chi tratta i tuoi dati</h2>
+  <p>Il titolare è {{ legali.ragione_sociale }}, {{ legali.sede }}, P.IVA {{ legali.piva }}.
+    Per qualsiasi richiesta: <a href="mailto:{{ negozio.email }}">{{ negozio.email }}</a>.</p>
+
+  <h2>Quali dati e perché</h2>
+  <ul>
+    <li><strong>Account</strong> (nome, cognome, email, username): per farti accedere e vedere i tuoi ordini.</li>
+    <li><strong>Ordini</strong> (nome, telefono, indirizzo, capi acquistati, metodo di pagamento): per preparare,
+      spedire o consegnare l'ordine e per gli obblighi fiscali.</li>
+    <li><strong>Messaggi</strong> dal modulo contatti: per risponderti.</li>
+    <li><strong>Domande alla stylist</strong>: per darti un consiglio. Non scriverci dati personali.</li>
+  </ul>
+  <p>La base è l'esecuzione del contratto o della tua richiesta e, per le fatture, un obbligo di legge.
+    Non usiamo i dati per pubblicità e non li vendiamo.</p>
+
+  <h2>Chi li vede</h2>
+  <ul>
+    <li>Il server del sito è di Hetzner Online GmbH, in Germania.</li>
+    <li>Gli avvisi dei nuovi ordini arrivano al negozio con Telegram.</li>
+    <li>Le domande alla stylist sono elaborate dal servizio di intelligenza artificiale Groq (Stati Uniti).</li>
+    <li>Per le spedizioni passiamo nome, indirizzo e telefono al corriere.</li>
+  </ul>
+
+  <h2>Per quanto tempo</h2>
+  <p>I dati degli ordini per 10 anni, come chiede la legge fiscale. L'account finché non ci chiedi di cancellarlo.
+    I messaggi il tempo necessario per risponderti.</p>
+
+  <h2>I tuoi diritti</h2>
+  <p>Puoi chiederci di vedere, correggere, cancellare o ricevere i tuoi dati e opporti al trattamento
+    (artt. 15-22 GDPR) scrivendo a <a href="mailto:{{ negozio.email }}">{{ negozio.email }}</a>.
+    Puoi anche fare reclamo al Garante per la protezione dei dati personali (garanteprivacy.it).</p>
+
+  <h2>Cookie</h2>
+  <p>Usiamo un solo cookie <strong>tecnico</strong>, necessario al funzionamento del sito: ricorda il carrello
+    e l'accesso al tuo account e si cancella quando chiudi il browser. Non usiamo cookie di profilazione,
+    di statistica o di terze parti, quindi non ti chiediamo il consenso.</p>
+
+  <p class="muted piccolo">Ultimo aggiornamento: ottobre 2026.</p>
+</section>
+{% endblock %}

@@ -37,15 +37,16 @@
 
       <fieldset>
         <legend>3 · Pagamento</legend>
+        {# il CSS mostra solo i metodi validi per la consegna scelta (in negozio solo col ritiro, contrassegno solo con la spedizione) #}
         <div class="scelte">
-          {% for metodo in pagamenti %}
-            <label class="scelta">
-              <input type="radio" name="pagamento" value="{{ metodo }}" required {% if request.form.get('pagamento', pagamenti[0]) == metodo %}checked{% endif %}>
-              <span><strong>{{ metodo }}</strong></span>
+          {% for metodo, info in pagamenti.items() %}
+            <label class="scelta{% if info.consegna %} scelta--{{ info.consegna }}{% endif %}">
+              <input type="radio" name="pagamento" value="{{ metodo }}" required {% if request.form.get('pagamento') == metodo %}checked{% endif %}>
+              <span><strong>{{ metodo }}</strong><small>{{ info.nota }}{% if metodo == 'Contrassegno' and costo_contrassegno %} Supplemento {{ costo_contrassegno|euro }}.{% endif %}</small></span>
             </label>
           {% endfor %}
         </div>
-        <p class="muted piccolo">Sito dimostrativo: nessun pagamento viene addebitato.</p>
+        <p class="muted piccolo">Non paghi nulla adesso: prima confermiamo che i capi sono disponibili, poi ti scriviamo.</p>
       </fieldset>
 
       <label class="campo--largo">Note per noi (facoltativo)
@@ -70,8 +71,20 @@
         <div><dt>Spedizione</dt><dd><span class="se-spedizione">{% if spedizione %}{{ spedizione|euro }}{% else %}Gratis{% endif %}</span><span class="se-ritiro">0,00 € · ritiro in negozio</span></dd></div>
         <div class="riepilogo__totale"><dt>Totale</dt><dd><span class="se-spedizione">{{ (subtotale + spedizione)|euro }}</span><span class="se-ritiro">{{ subtotale|euro }}</span></dd></div>
       </dl>
-      <button class="bottone bottone--pieno bottone--largo">Conferma l'ordine</button>
+      <label class="accetto">
+        <input type="checkbox" name="condizioni" value="1" required>
+        <span>Ho letto e accetto le <a href="{{ url_for('shop.condizioni') }}" target="_blank">condizioni di vendita</a> e l'<a href="{{ url_for('shop.privacy') }}" target="_blank">informativa privacy</a>.</span>
+      </label>
+      <button class="bottone bottone--pieno bottone--largo">Invia l'ordine</button>
     </aside>
   </form>
 </section>
+
+<script>
+  // cambiando consegna, se il pagamento scelto non vale più lo tolgo
+  document.querySelectorAll("input[name=consegna]").forEach((radio) => radio.addEventListener("change", () => {
+    const scelto = document.querySelector("input[name=pagamento]:checked");
+    if (scelto && scelto.closest(".scelta").offsetParent === null) scelto.checked = false;
+  }));
+</script>
 {% endblock %}
