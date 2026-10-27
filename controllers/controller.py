@@ -50,6 +50,7 @@ from services.ordini import (
     cambia_stato,
     esegui,
     nuovo_ordine,
+    pagamenti_attivi,
     pagamenti_validi,
 )
 
@@ -282,7 +283,7 @@ def checkout():
         righe=righe,
         subtotale=subtotale,
         spedizione=costo_spedizione(subtotale, "spedizione"),
-        pagamenti=PAGAMENTI,
+        pagamenti=pagamenti_attivi(),
         costo_contrassegno=current_app.config["COSTO_CONTRASSEGNO"],
     )
 

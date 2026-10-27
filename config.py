@@ -38,6 +38,8 @@ class Config:
     IBAN = os.getenv("IBAN", "")
     INTESTATARIO = os.getenv("INTESTATARIO", "Up Collection di Torta Federico e C. s.a.s.")
     SATISPAY_NOME = os.getenv("SATISPAY_NOME", "Up Collection")
+    # Satispay compare al checkout solo quando il negozio ha Satispay Business attivo
+    SATISPAY_ATTIVO = os.getenv("SATISPAY_ATTIVO", "") == "1"
 
     # Telegram: il bot avvisa di ogni ordine con i pulsanti Conferma / Rifiuta
     TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "")

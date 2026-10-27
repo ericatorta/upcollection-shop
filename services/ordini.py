@@ -40,8 +40,20 @@ AZIONI = {
 }
 
 
+def pagamenti_attivi():
+    """Bonifico solo con l'IBAN nel .env, Satispay solo quando SATISPAY_ATTIVO=1."""
+    from flask import current_app
+    c = current_app.config
+    spenti = set()
+    if not c["IBAN"]:
+        spenti.add("Bonifico")
+    if not c["SATISPAY_ATTIVO"]:
+        spenti.add("Satispay")
+    return {nome: info for nome, info in PAGAMENTI.items() if nome not in spenti}
+
+
 def pagamenti_validi(consegna):
-    return [nome for nome, info in PAGAMENTI.items() if info["consegna"] in ("", consegna)]
+    return [nome for nome, info in pagamenti_attivi().items() if info["consegna"] in ("", consegna)]
 
 
 def azioni_possibili(ordine):
