@@ -66,7 +66,11 @@ def testo_ordine(ordine, righe):
 
 def _tastiera(ordine, azioni):
     from services.ordini import AZIONI
+    from services.email import link_whatsapp
     bottoni = [[{"text": AZIONI[a][2], "callback_data": a + ":" + str(ordine["id_ordini"])}] for a in azioni]
+    whatsapp = link_whatsapp(ordine)
+    if whatsapp:
+        bottoni.append([{"text": "💬 Avvisa su WhatsApp", "url": whatsapp}])
     sito = current_app.config["SITO_URL"]
     if sito.startswith("https://"):  # Telegram accetta solo link pubblici
         bottoni.append([{"text": "Apri nel pannello", "url": sito + "/ordine/" + str(ordine["id_ordini"])}])

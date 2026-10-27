@@ -56,6 +56,9 @@
             {% endfor %}
           </div>
         {% endif %}
+        {% if whatsapp %}
+          <a class="bottone bottone--largo azioni-ordine" href="{{ whatsapp }}" target="_blank" rel="noopener">💬 Avvisa su WhatsApp</a>
+        {% endif %}
         <form class="modulo" method="post" action="{{ url_for('shop.cambia_stato_ordine', id=ordine.id_ordini) }}">
           <label>Correggi lo stato a mano
             <select name="stato">

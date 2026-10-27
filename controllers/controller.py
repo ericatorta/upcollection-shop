@@ -41,7 +41,7 @@ from models.database import (
     trova_prodotti,
 )
 from services import telegram
-from services.email import istruzioni_pagamento
+from services.email import istruzioni_pagamento, link_whatsapp
 from services.ordini import (
     AZIONI,
     PAGAMENTI,
@@ -389,7 +389,7 @@ def scheda_ordine(id):
     return render_template("scheda_ordine.html", ordine=ordine,
                            righe=leggi_righe_ordine(id), stati=STATI_ORDINE,
                            azioni=azioni_possibili(ordine), etichette=AZIONI,
-                           istruzioni=istruzioni_pagamento(ordine))
+                           istruzioni=istruzioni_pagamento(ordine), whatsapp=link_whatsapp(ordine))
 
 
 # CONTATTI E STYLIST IA

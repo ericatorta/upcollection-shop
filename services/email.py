@@ -5,6 +5,7 @@ Senza SMTP_HOST nel .env non parte niente: il cliente vede comunque lo stato in 
 """
 import logging
 import smtplib
+from urllib.parse import quote
 from email.message import EmailMessage
 
 from flask import current_app
@@ -31,7 +32,7 @@ def istruzioni_pagamento(ordine):
     return ""
 
 
-def _testo(ordine):
+def _testo(ordine, firma=True):
     numero = "#" + str(ordine["id_ordini"])
     nome = ordine["destinatario"].split(" ")[0]
     stato = ordine["stato"]
@@ -52,12 +53,27 @@ def _testo(ordine):
                  + ordine["citta"] + " in 2-4 giorni lavorativi.")
     elif stato == "annullato":
         corpo = ("purtroppo non possiamo evadere il tuo ordine " + numero + ". "
-                 "Se avevi già pagato ti rimborsiamo per intero. Per qualsiasi domanda rispondi a questa email.")
+                 "Se avevi già pagato ti rimborsiamo per intero. Per qualsiasi domanda scrivici, ti rispondiamo subito.")
     else:
         return None
-    return "Ciao " + nome + ",\n\n" + corpo + "\n\nDettagli: " + current_app.config["SITO_URL"] \
-        + "/ordine/" + str(ordine["id_ordini"]) + "\n\nGrazie,\nUp Collection · " \
-        + current_app.config["NEGOZIO"]["telefono"]
+    testo = "Ciao " + nome + ",\n\n" + corpo + "\n\nDettagli: " + current_app.config["SITO_URL"] \
+        + "/ordine/" + str(ordine["id_ordini"])
+    if firma:
+        testo += "\n\nGrazie,\nUp Collection · " + current_app.config["NEGOZIO"]["telefono"]
+    return testo
+
+
+def link_whatsapp(ordine):
+    """Link che apre WhatsApp sulla chat del cliente con il messaggio dello stato attuale già scritto."""
+    numero = "".join(c for c in ordine["telefono"] if c.isdigit())
+    if numero.startswith("00"):
+        numero = numero[2:]
+    if len(numero) <= 10:  # numero italiano senza prefisso (es. 333 1234567 o 011 331867)
+        numero = "39" + numero
+    testo = _testo(ordine, firma=False)
+    if len(numero) < 11 or not testo:
+        return ""
+    return "https://wa.me/" + numero + "?text=" + quote(testo + "\n\nUp Collection")
 
 
 def avvisa_cliente(ordine, righe):
