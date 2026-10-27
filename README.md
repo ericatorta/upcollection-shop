@@ -5,6 +5,9 @@ Scritto in **Python + Flask** con architettura **MVC**, database **SQLite** e un
 
 *A full e-commerce for Up Collection, a family-run clothing store in Turin since the 1960s. Built with Python, Flask (MVC), SQLite and an AI stylist powered by Groq.*
 
+**Demo online:** https://upcollection-shop.onrender.com
+*(piano gratuito di Render: dopo un po' senza visite il primo caricamento può richiedere fino a un minuto)*
+
 ![Home](docs/home.jpg)
 
 | Catalogo | Scheda prodotto |
