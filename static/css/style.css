@@ -664,6 +664,8 @@ a.numero:hover { background: var(--sabbia-scura); transform: translateY(-2px); }
 .legale h2 { font-family: var(--serif); font-weight: 400; font-size: 26px; margin: 38px 0 10px; }
 .legale p, .legale li { line-height: 1.7; }
 .legale a { text-decoration: underline; }
+.modulo-recesso { margin: 16px 0 0; padding: 20px 24px; border: 1px solid var(--linea, #ddd); }
+.modulo-recesso p { margin: 0 0 8px; }
 .istruzioni { margin: 26px 0; padding: 20px 22px; border: 1px solid var(--blu); background: var(--blu-chiaro); line-height: 1.6; }
 .istruzioni strong { display: block; margin-bottom: 4px; color: var(--blu); }
 .azioni-ordine { display: grid; gap: 8px; margin-top: 18px; }
