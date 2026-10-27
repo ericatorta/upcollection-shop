@@ -15,7 +15,7 @@
 
   <div class="annuncio">
     <div class="annuncio__testi">
-      <span>Spedizione gratuita da {{ soglia_gratis }} €</span>
+      {% if spedizione_attiva %}<span>Spedizione gratuita da {{ soglia_gratis }} €</span>{% else %}<span>Ordini online, ritiri in negozio</span>{% endif %}
       <span>Ritiro gratuito in negozio · Corso Racconigi 159D</span>
       <span>Reso facile entro 14 giorni</span>
     </div>
@@ -104,8 +104,13 @@
     <div class="wrap servizi__griglia">
       <div>
         <svg class="icona icona--grande" viewBox="0 0 24 24"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="17.5" r="1.5"/><circle cx="17" cy="17.5" r="1.5"/></svg>
-        <h3>Spedizione gratuita</h3>
-        <p>Sopra i {{ soglia_gratis }} €, in tutta Italia.</p>
+        {% if spedizione_attiva %}
+          <h3>Spedizione gratuita</h3>
+          <p>Sopra i {{ soglia_gratis }} €, in tutta Italia.</p>
+        {% else %}
+          <h3>Prenoti online</h3>
+          <p>Lo metti da parte con un clic e lo trovi pronto in negozio.</p>
+        {% endif %}
       </div>
       <div>
         <svg class="icona icona--grande" viewBox="0 0 24 24"><path d="M4 10 12 4l8 6v10H4z"/><path d="M10 20v-6h4v6"/></svg>

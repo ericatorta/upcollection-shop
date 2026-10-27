@@ -61,8 +61,12 @@
         </ul>
       </details>
       <details class="tendina">
-        <summary>Spedizione e ritiro</summary>
-        <p>Spedizione gratuita sopra i {{ soglia_gratis }} € (altrimenti 7 €), consegna in 2-4 giorni lavorativi. Oppure ritiro gratuito in negozio, in {{ negozio.indirizzo }}.</p>
+        <summary>{% if spedizione_attiva %}Spedizione e ritiro{% else %}Ritiro in negozio{% endif %}</summary>
+        {% if spedizione_attiva %}
+          <p>Spedizione gratuita sopra i {{ soglia_gratis }} € (altrimenti 7 €), consegna in 2-4 giorni lavorativi. Oppure ritiro gratuito in negozio, in {{ negozio.indirizzo }}.</p>
+        {% else %}
+          <p>Ordini online e ritiri gratis in negozio, in {{ negozio.indirizzo }}: ti avvisiamo quando è pronto. La spedizione arriva presto.</p>
+        {% endif %}
       </details>
       <details class="tendina">
         <summary>Resi e cambi</summary>

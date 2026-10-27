@@ -15,6 +15,7 @@ from models.database import (
     registra_utente,
     login_utente,
     trova_utente,
+    utente_ospite,
     modifica_utente,
     leggi_prodotti,
     leggi_novita,
@@ -236,9 +237,10 @@ def rimuovi_dal_carrello():
 
 
 @shop.route("/checkout", methods=["GET", "POST"])
-@login_required
 def checkout():
+    """Aperto anche a chi non ha l'account: allora chiediamo l'email per gli aggiornamenti."""
     utente = current_user()
+    spedizione_attiva = current_app.config["SPEDIZIONE_ATTIVA"]
     righe, subtotale = righe_carrello()
     if not righe:
         flash("Il carrello è vuoto.", "warning")
@@ -253,9 +255,12 @@ def checkout():
         citta = request.form.get("citta", "").strip()
         pagamento = request.form.get("pagamento", "")
         note = request.form.get("note", "").strip()
-        if consegna not in ("spedizione", "ritiro"):
-            consegna = "spedizione"
-        if not destinatario or not telefono or pagamento not in pagamenti_validi(consegna):
+        email_ospite = request.form.get("email", "").strip()
+        if consegna not in ("spedizione", "ritiro") or not spedizione_attiva:
+            consegna = "ritiro"
+        if not utente and not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email_ospite):
+            flash("Scrivi un indirizzo email valido: ti mandiamo lì la conferma dell'ordine.", "error")
+        elif not destinatario or not telefono or pagamento not in pagamenti_validi(consegna):
             flash("Compila nome, telefono e un metodo di pagamento valido per la consegna scelta.", "error")
         elif consegna == "spedizione" and (not indirizzo or not cap or not citta):
             flash("Per la spedizione servono indirizzo, CAP e città.", "error")
@@ -263,14 +268,22 @@ def checkout():
             flash("Per ordinare devi accettare le condizioni di vendita.", "error")
         else:
             try:
+                if utente:
+                    id_cliente = utente["id_utenti"]
+                else:
+                    nome, _, cognome = destinatario.partition(" ")
+                    id_cliente = utente_ospite(nome, cognome, email_ospite)
                 id_ordine = crea_ordine(
-                    utente["id_utenti"], destinatario, telefono, consegna,
+                    id_cliente, destinatario, telefono, consegna,
                     indirizzo, cap, citta, pagamento, note,
                     costo_spedizione(subtotale, consegna, pagamento),
                     [{"id": r["prodotto"]["id_prodotti"], "taglia": r["taglia"],
                       "quantita": r["quantita"]} for r in righe],
                 )
                 session["carrello"] = {}
+                if not utente:
+                    # l'ospite può rivedere i suoi ordini finché non chiude il browser
+                    session["ordini_ospite"] = session.get("ordini_ospite", []) + [id_ordine]
                 nuovo_ordine(id_ordine)  # Telegram al negozio + email al cliente
                 return redirect(url_for("shop.grazie", id=id_ordine))
             except ValueError:
@@ -283,17 +296,25 @@ def checkout():
         righe=righe,
         subtotale=subtotale,
         spedizione=costo_spedizione(subtotale, "spedizione"),
+        spedizione_attiva=spedizione_attiva,
         pagamenti=pagamenti_attivi(),
         costo_contrassegno=current_app.config["COSTO_CONTRASSEGNO"],
     )
 
 
+def ordine_visibile(ordine):
+    """Il cliente vede solo i suoi ordini; l'ospite quelli fatti in questa sessione."""
+    if not ordine:
+        return False
+    return (ordine["id_utenti"] == session.get("id_utenti")
+            or ordine["id_ordini"] in session.get("ordini_ospite", []))
+
+
 @shop.route("/grazie/<int:id>")
-@login_required
 def grazie(id):
     ordine = trova_ordine(id)
-    if not ordine or ordine["id_utenti"] != session["id_utenti"]:
-        return redirect(url_for("shop.ordini"))
+    if not ordine_visibile(ordine):
+        return redirect(url_for("shop.index"))
     return render_template("grazie.html", ordine=ordine, righe=leggi_righe_ordine(id),
                            istruzioni=istruzioni_pagamento(ordine))
 
@@ -405,6 +426,33 @@ def condizioni():
 @shop.route("/privacy")
 def privacy():
     return render_template("privacy.html", legali=current_app.config["DATI_LEGALI"])
+
+
+# per Google: cosa può leggere e l'elenco delle pagine (con tutti i capi disponibili)
+@shop.route("/robots.txt")
+def robots():
+    testo = ("User-agent: *\n"
+             "Disallow: /admin\nDisallow: /carrello\nDisallow: /checkout\nDisallow: /grazie/\n"
+             "Disallow: /ordine/\nDisallow: /ordini\nDisallow: /profilo\nDisallow: /telegram/\n"
+             "Sitemap: " + current_app.config["SITO_URL"] + "/sitemap.xml\n")
+    return current_app.response_class(testo, mimetype="text/plain")
+
+
+@shop.route("/sitemap.xml")
+def sitemap():
+    sito = current_app.config["SITO_URL"]
+    pagine = ["/", "/catalogo", "/catalogo?categoria=donna", "/catalogo?categoria=uomo",
+              "/stylist", "/contatti", "/condizioni-di-vendita", "/privacy"]
+    pagine += ["/prodotto/" + str(p["id_prodotti"]) for p in leggi_prodotti() if p["quantita"] > 0]
+    righe = "".join("  <url><loc>" + sito + pagina.replace("&", "&amp;") + "</loc></url>\n" for pagina in pagine)
+    xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
+           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + righe + "</urlset>\n")
+    return current_app.response_class(xml, mimetype="application/xml")
+
+
+@shop.route("/favicon.ico")
+def favicon():
+    return redirect(url_for("static", filename="img/favicon.svg"), code=301)
 
 
 @shop.route("/contatti", methods=["GET", "POST"])

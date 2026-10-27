@@ -56,8 +56,10 @@ def _testo(ordine, firma=True):
                  "Se avevi già pagato ti rimborsiamo per intero. Per qualsiasi domanda scrivici, ti rispondiamo subito.")
     else:
         return None
-    testo = "Ciao " + nome + ",\n\n" + corpo + "\n\nDettagli: " + current_app.config["SITO_URL"] \
-        + "/ordine/" + str(ordine["id_ordini"])
+    testo = "Ciao " + nome + ",\n\n" + corpo
+    # chi ha comprato senza account non può aprire la scheda dell'ordine: niente link
+    if not ordine["username"].startswith("ospite-"):
+        testo += "\n\nDettagli: " + current_app.config["SITO_URL"] + "/ordine/" + str(ordine["id_ordini"])
     if firma:
         testo += "\n\nGrazie,\nUp Collection · " + current_app.config["NEGOZIO"]["telefono"]
     return testo

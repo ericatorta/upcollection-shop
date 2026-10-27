@@ -39,7 +39,7 @@
 
   {# pulsante #}
   <tr><td style="padding:28px 28px 8px;">
-    <a href="{{ sito }}/ordine/{{ ordine.id_ordini }}" style="display:inline-block;background:#2d4587;color:#ffffff;text-decoration:none;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:15px 30px;">Vedi il tuo ordine</a>
+    {% if not ordine.username.startswith('ospite-') %}<a href="{{ sito }}/ordine/{{ ordine.id_ordini }}" style="display:inline-block;background:#2d4587;color:#ffffff;text-decoration:none;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:15px 30px;">Vedi il tuo ordine</a>{% endif %}
   </td></tr>
 
   {# capi #}

@@ -11,6 +11,7 @@ Tabelle
                    dell'acquisto, così l'ordine resta giusto anche se il prodotto cambia)
     messaggi       quello che arriva dal modulo "Contatti"
 """
+import secrets
 import sqlite3
 from contextlib import contextmanager
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -173,6 +174,23 @@ def registra_utente(username, password, nome, cognome, email):
             INSERT INTO utenti (username, password, nome, cognome, email, ruolo, registrato)
             VALUES (?, ?, ?, ?, ?, 'cliente', datetime('now', 'localtime'))
         """, (username, generate_password_hash(password), nome, cognome, email))
+
+
+def utente_ospite(nome, cognome, email):
+    """Chi compra senza account: un cliente "ospite-..." con password a caso (non può accedere).
+    Lo stesso indirizzo email riusa lo stesso cliente, così nel pannello gli ordini restano insieme.
+    """
+    with db_connection() as conn:
+        ospite = conn.execute("""
+            SELECT id_utenti FROM utenti WHERE username LIKE 'ospite-%' AND lower(email) = lower(?)
+        """, (email,)).fetchone()
+        if ospite:
+            return ospite["id_utenti"]
+        return conn.execute("""
+            INSERT INTO utenti (username, password, nome, cognome, email, ruolo, registrato)
+            VALUES (?, ?, ?, ?, ?, 'cliente', datetime('now', 'localtime'))
+        """, ("ospite-" + secrets.token_hex(6), generate_password_hash(secrets.token_hex(16)),
+              nome, cognome, email)).lastrowid
 
 
 def leggi_clienti(cerca=""):

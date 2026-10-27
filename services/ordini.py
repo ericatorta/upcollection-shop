@@ -41,7 +41,8 @@ AZIONI = {
 
 
 def pagamenti_attivi():
-    """Bonifico solo con l'IBAN nel .env, Satispay solo quando SATISPAY_ATTIVO=1."""
+    """Bonifico solo con l'IBAN nel .env, Satispay solo quando SATISPAY_ATTIVO=1,
+    contrassegno solo quando c'è il corriere (SPEDIZIONE_ATTIVA=1)."""
     from flask import current_app
     c = current_app.config
     spenti = set()
@@ -49,6 +50,8 @@ def pagamenti_attivi():
         spenti.add("Bonifico")
     if not c["SATISPAY_ATTIVO"]:
         spenti.add("Satispay")
+    if not c["SPEDIZIONE_ATTIVA"]:
+        spenti.add("Contrassegno")
     return {nome: info for nome, info in PAGAMENTI.items() if nome not in spenti}
 
 

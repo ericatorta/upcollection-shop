@@ -27,9 +27,14 @@
   </ul>
 
   <h2>5. Spedizione e ritiro</h2>
+  {% if spedizione_attiva %}
   <p>Spediamo in Italia in 2-4 giorni lavorativi dalla conferma (o dal pagamento). La spedizione costa
     {{ config.COSTO_SPEDIZIONE|euro }} ed è gratuita sopra i {{ soglia_gratis }} €. Il ritiro in negozio è sempre gratuito:
     ti avvisiamo quando l'ordine è pronto.</p>
+  {% else %}
+  <p>Per ora gli ordini online si ritirano in negozio, in {{ negozio.indirizzo }}, senza costi:
+    ti avvisiamo quando l'ordine è pronto. La spedizione a casa sarà disponibile a breve.</p>
+  {% endif %}
 
   <h2>6. Diritto di recesso (reso)</h2>
   <p>Puoi restituire i capi entro <strong>14 giorni</strong> dal giorno in cui li ricevi, senza dover dare spiegazioni

@@ -34,6 +34,7 @@ def create_app():
     def dati_comuni():
         # disponibili in tutti i template: dati del negozio
         return {"negozio": Config.NEGOZIO, "soglia_gratis": Config.SOGLIA_SPEDIZIONE_GRATIS,
+                "spedizione_attiva": Config.SPEDIZIONE_ATTIVA,
                 "loghi": Config.LOGHI_MARCHI}
 
     @app.errorhandler(404)

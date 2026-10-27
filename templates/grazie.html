@@ -23,7 +23,9 @@
   </ul>
   <p class="grazie__totale">Totale {{ ordine.totale|euro }}</p>
   <div class="bottoni bottoni--centro">
-    <a class="bottone bottone--pieno" href="{{ url_for('shop.scheda_ordine', id=ordine.id_ordini) }}">Vedi l'ordine</a>
+    {% if session.get('id_utenti') %}
+      <a class="bottone bottone--pieno" href="{{ url_for('shop.scheda_ordine', id=ordine.id_ordini) }}">Vedi l'ordine</a>
+    {% endif %}
     <a class="bottone" href="{{ url_for('shop.catalogo') }}">Continua lo shopping</a>
   </div>
 </section>

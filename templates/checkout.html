@@ -11,12 +11,14 @@
       <fieldset>
         <legend>1 · Come lo vuoi ricevere?</legend>
         <div class="scelte">
+          {% if spedizione_attiva %}
           <label class="scelta">
             <input type="radio" name="consegna" value="spedizione" {% if request.form.get('consegna', 'spedizione') == 'spedizione' %}checked{% endif %}>
             <span><strong>Spedizione a casa</strong><small>2-4 giorni lavorativi · {% if spedizione %}{{ spedizione|euro }}{% else %}gratis{% endif %}</small></span>
           </label>
+          {% endif %}
           <label class="scelta">
-            <input type="radio" name="consegna" value="ritiro" {% if request.form.get('consegna') == 'ritiro' %}checked{% endif %}>
+            <input type="radio" name="consegna" value="ritiro" {% if request.form.get('consegna') == 'ritiro' or not spedizione_attiva %}checked{% endif %}>
             <span><strong>Ritiro in negozio</strong><small>{{ negozio.indirizzo }} · gratis</small></span>
           </label>
         </div>
@@ -24,9 +26,15 @@
 
       <fieldset>
         <legend>2 · I tuoi dati</legend>
+        {% if not utente %}
+          <p class="muted piccolo">Compri senza account. Hai già un account? <a class="sottolineato" href="{{ url_for('shop.login', next=url_for('shop.checkout')) }}">Accedi</a></p>
+        {% endif %}
         <div class="campi">
-          <label>Nome e cognome<input name="destinatario" required value="{{ request.form.get('destinatario', utente.nome ~ ' ' ~ utente.cognome) }}"></label>
-          <label>Telefono<input name="telefono" type="tel" required value="{{ request.form.get('telefono', '') }}" placeholder="Per avvisarti della consegna"></label>
+          <label>Nome e cognome<input name="destinatario" required autocomplete="name" value="{{ request.form.get('destinatario', (utente.nome ~ ' ' ~ utente.cognome) if utente else '') }}"></label>
+          <label>Telefono<input name="telefono" type="tel" required autocomplete="tel" value="{{ request.form.get('telefono', '') }}" placeholder="Per avvisarti quando è pronto"></label>
+          {% if not utente %}
+            <label class="campo--largo">Email<input name="email" type="email" required autocomplete="email" value="{{ request.form.get('email', '') }}" placeholder="Ti mandiamo qui la conferma"></label>
+          {% endif %}
         </div>
         <div class="campi solo-spedizione">
           <label class="campo--largo">Indirizzo<input name="indirizzo" value="{{ request.form.get('indirizzo', '') }}" placeholder="Via e numero civico"></label>

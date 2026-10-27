@@ -28,7 +28,9 @@ class Config:
     # senza, il sito crea gli account di prova (admin/Admin123! e cliente/Cliente123!)
     ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "")
 
-    # Spedizione: gratis sopra la soglia, ritiro in negozio sempre gratis
+    # Spedizione: gratis sopra la soglia, ritiro in negozio sempre gratis.
+    # Finché non c'è un corriere (SPEDIZIONE_ATTIVA=1 nel .env) si vende solo col ritiro in negozio.
+    SPEDIZIONE_ATTIVA = os.getenv("SPEDIZIONE_ATTIVA", "") == "1"
     SOGLIA_SPEDIZIONE_GRATIS = 99
     COSTO_SPEDIZIONE = 7
     # supplemento del corriere per il pagamento alla consegna
