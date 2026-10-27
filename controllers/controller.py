@@ -510,8 +510,9 @@ def stylist():
     usate = session.get("domande_stylist", 0)
     rimaste = None if utente else max(LIMITE_DOMANDE_OSPITE - usate, 0)
 
-    if request.method == "POST":
-        domanda = request.form.get("domanda", "").strip()[:300]
+    # la domanda arriva dal modulo della pagina o dal sito vetrina (/stylist?domanda=...)
+    if request.method == "POST" or request.args.get("domanda"):
+        domanda = request.values.get("domanda", "").strip()[:300]
         if domanda and not utente and usate >= LIMITE_DOMANDE_OSPITE:
             risposta = ("Ti sono piaciuti i miei consigli? Crea un account gratis "
                         "e continuiamo a scegliere insieme.")
