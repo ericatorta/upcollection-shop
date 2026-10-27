@@ -121,6 +121,11 @@ def crea_database():
             )
         """)
 
+        # aggiunta il 27/10/2026: data di registrazione dei clienti (i database già esistenti non l'avevano)
+        colonne = [c["name"] for c in conn.execute("PRAGMA table_info(utenti)")]
+        if "registrato" not in colonne:
+            conn.execute("ALTER TABLE utenti ADD COLUMN registrato TEXT")
+
         # primo avvio online: solo l'admin, con la password scelta nel .env
         if conn.execute("SELECT COUNT(*) FROM utenti").fetchone()[0] == 0 and Config.ADMIN_PASSWORD:
             conn.execute("""
@@ -155,9 +160,27 @@ def registra_utente(username, password, nome, cognome, email):
     """Nuovo cliente. La password viene salvata solo come hash."""
     with db_connection() as conn:
         conn.execute("""
-            INSERT INTO utenti (username, password, nome, cognome, email, ruolo)
-            VALUES (?, ?, ?, ?, ?, 'cliente')
+            INSERT INTO utenti (username, password, nome, cognome, email, ruolo, registrato)
+            VALUES (?, ?, ?, ?, ?, 'cliente', datetime('now', 'localtime'))
         """, (username, generate_password_hash(password), nome, cognome, email))
+
+
+def leggi_clienti(cerca=""):
+    """Clienti registrati (admin) con numero di ordini e speso, i più recenti per primi."""
+    with db_connection() as conn:
+        return conn.execute("""
+            SELECT utenti.id_utenti, utenti.username, utenti.nome, utenti.cognome,
+                   utenti.email, utenti.registrato,
+                   COUNT(ordini.id_ordini) AS ordini,
+                   COALESCE(SUM(CASE WHEN ordini.stato != 'annullato' THEN ordini.totale END), 0) AS speso,
+                   MAX(ordini.telefono) AS telefono
+            FROM utenti
+            LEFT JOIN ordini ON ordini.id_utenti = utenti.id_utenti
+            WHERE utenti.ruolo = 'cliente'
+              AND (? = '' OR utenti.nome || ' ' || utenti.cognome || ' ' || utenti.email || ' ' || utenti.username LIKE ?)
+            GROUP BY utenti.id_utenti
+            ORDER BY utenti.id_utenti DESC
+        """, (cerca, "%" + cerca + "%")).fetchall()
 
 
 def login_utente(username, password):

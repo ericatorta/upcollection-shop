@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block titolo %}{{ cliente.nome }} {{ cliente.cognome }} · Admin{% endblock %}
+{% block body_class %}pagina-admin{% endblock %}
+
+{% block contenuto %}
+<section class="wrap pagina">
+  <p class="occhiello"><a href="{{ url_for('shop.admin_clienti') }}">Clienti</a> / {{ cliente.nome }} {{ cliente.cognome }}</p>
+  <h1 class="titolo titolo--grande">{{ cliente.nome }} {{ cliente.cognome }}</h1>
+  {% include "admin/_nav.html" %}
+
+  <div class="cassa">
+    <div>
+      <h2 class="sottotitolo">Ordini</h2>
+      <div class="tabella">
+        {% for o in ordini %}
+          <a class="tabella__riga" href="{{ url_for('shop.scheda_ordine', id=o.id_ordini) }}">
+            <span><strong>#{{ o.id_ordini }}</strong><small>{{ o.data[:16] }}</small></span>
+            <span>{{ o.capi }} {{ 'capo' if o.capi == 1 else 'capi' }}<small>{{ 'Ritiro in negozio' if o.consegna == 'ritiro' else o.indirizzo ~ ', ' ~ o.citta }} · {{ o.pagamento }}</small></span>
+            <span class="stato stato--{{ o.stato|replace(' ', '-') }}">{{ o.stato }}</span>
+            <span>{{ o.totale|euro }}</span>
+          </a>
+        {% else %}
+          <p class="muted">Nessun ordine finora.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <aside class="riepilogo">
+      <h2>Dati</h2>
+      <dl>
+        <div><dt>Email</dt><dd><a class="sottolineato" href="mailto:{{ cliente.email }}">{{ cliente.email }}</a></dd></div>
+        <div><dt>Username</dt><dd>@{{ cliente.username }}</dd></div>
+        {% if riepilogo and riepilogo.telefono %}
+          <div><dt>Telefono</dt><dd><a class="sottolineato" href="https://wa.me/39{{ riepilogo.telefono|replace(' ', '') }}" target="_blank" rel="noopener">{{ riepilogo.telefono }}</a></dd></div>
+        {% endif %}
+        {% if riepilogo and riepilogo.registrato %}<div><dt>Registrato il</dt><dd>{{ riepilogo.registrato[:10] }}</dd></div>{% endif %}
+        <div><dt>Ordini</dt><dd>{{ ordini|length }}</dd></div>
+        <div class="riepilogo__totale"><dt>Speso</dt><dd>{{ (riepilogo.speso if riepilogo else 0)|euro }}</dd></div>
+      </dl>
+    </aside>
+  </div>
+</section>
+{% endblock %}

@@ -29,6 +29,7 @@ from models.database import (
     scorte_basse,
     crea_ordine,
     leggi_ordini_utente,
+    leggi_clienti,
     leggi_ordini,
     trova_ordine,
     leggi_righe_ordine,
@@ -729,6 +730,25 @@ def telegram_webhook(segreto):
     else:
         telegram.rispondi_tocco(tocco["id"], "Già fatto o non più possibile.")
     return "ok"
+
+
+@shop.route("/admin/clienti")
+@role_required("admin")
+def admin_clienti():
+    cerca = request.args.get("q", "").strip()
+    return render_template("admin/clienti.html", clienti=leggi_clienti(cerca), cerca=cerca)
+
+
+@shop.route("/admin/clienti/<int:id>")
+@role_required("admin")
+def admin_cliente(id):
+    cliente = trova_utente(id)
+    if not cliente or cliente["ruolo"] != "cliente":
+        flash("Cliente non trovato.", "error")
+        return redirect(url_for("shop.admin_clienti"))
+    riepilogo = next((c for c in leggi_clienti() if c["id_utenti"] == id), None)
+    return render_template("admin/cliente.html", cliente=cliente, riepilogo=riepilogo,
+                           ordini=leggi_ordini_utente(id))
 
 
 @shop.route("/admin/messaggi")

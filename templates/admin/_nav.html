@@ -2,5 +2,6 @@
   <a class="{% if request.endpoint == 'shop.admin' %}attiva{% endif %}" href="{{ url_for('shop.admin') }}">Dashboard</a>
   <a class="{% if 'prodott' in request.endpoint %}attiva{% endif %}" href="{{ url_for('shop.admin_prodotti') }}">Prodotti</a>
   <a class="{% if 'ordini' in request.endpoint %}attiva{% endif %}" href="{{ url_for('shop.admin_ordini') }}">Ordini</a>
+  <a class="{% if 'client' in request.endpoint %}attiva{% endif %}" href="{{ url_for('shop.admin_clienti') }}">Clienti</a>
   <a class="{% if 'messaggi' in request.endpoint %}attiva{% endif %}" href="{{ url_for('shop.admin_messaggi') }}">Messaggi</a>
 </nav>

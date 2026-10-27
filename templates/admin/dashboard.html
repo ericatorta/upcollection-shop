@@ -12,7 +12,7 @@
     <div class="numero numero--blu"><span>Incasso</span><strong>{{ numeri.incasso|euro }}</strong></div>
     <a class="numero" href="{{ url_for('shop.admin_ordini', stato='da confermare') }}"><span>Da confermare</span><strong>{{ numeri.da_preparare }}</strong></a>
     <a class="numero" href="{{ url_for('shop.admin_ordini') }}"><span>Ordini</span><strong>{{ numeri.ordini }}</strong></a>
-    <div class="numero"><span>Clienti</span><strong>{{ numeri.clienti }}</strong></div>
+    <a class="numero" href="{{ url_for('shop.admin_clienti') }}"><span>Clienti</span><strong>{{ numeri.clienti }}</strong></a>
     <a class="numero" href="{{ url_for('shop.admin_prodotti') }}"><span>Prodotti</span><strong>{{ numeri.prodotti }}</strong></a>
     <a class="numero" href="{{ url_for('shop.admin_messaggi') }}"><span>Messaggi</span><strong>{{ numeri.messaggi }}</strong></a>
   </div>
