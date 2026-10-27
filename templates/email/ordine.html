@@ -1,0 +1,105 @@
+<!doctype html>
+{# Email al cliente a ogni cambio di stato. Stili tutti in linea e tabelle: è quello che le caselle di posta capiscono. #}
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light only">
+<title>{{ occhiello }} · Up Collection</title>
+</head>
+<body style="margin:0;padding:0;background:#f6f3ee;">
+<div style="display:none;max-height:0;overflow:hidden;color:#f6f3ee;">{{ corpo }}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f6f3ee;">
+<tr><td align="center" style="padding:32px 12px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;background:#ffffff;font-family:Helvetica,Arial,sans-serif;color:#151515;">
+
+  {# logo #}
+  <tr><td align="center" style="background:#2d4587;padding:22px 16px;">
+    <a href="{{ sito }}" style="text-decoration:none;"><img src="https://upcollectiontorino.com/assets/img/email/logo.png" width="220" alt="UP COLLECTION" style="display:block;border:0;width:220px;max-width:100%;height:auto;color:#ffffff;font-family:Georgia,'Times New Roman',serif;font-size:22px;letter-spacing:4px;"></a>
+  </td></tr>
+
+  {# titolo #}
+  <tr><td style="padding:36px 28px 0;">
+    <p style="margin:0 0 12px;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#2d4587;">{{ occhiello }} · n. {{ ordine.id_ordini }}</p>
+    <h1 style="margin:0 0 18px;font-family:Georgia,'Times New Roman',serif;font-weight:normal;font-size:34px;line-height:1.15;color:#151515;">{{ titolo }}</h1>
+    <p style="margin:0;font-size:15px;line-height:1.65;color:#444444;">{{ corpo }}</p>
+  </td></tr>
+
+  {# come pagare (bonifico, Satispay) #}
+  {% if istruzioni %}
+  <tr><td style="padding:24px 28px 0;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e9edf6;border-left:3px solid #2d4587;">
+      <tr><td style="padding:18px 20px;">
+        <p style="margin:0 0 6px;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#2d4587;font-weight:bold;">Come pagare · {{ ordine.pagamento }}</p>
+        <p style="margin:0;font-size:15px;line-height:1.6;color:#151515;">{{ istruzioni }}</p>
+      </td></tr>
+    </table>
+  </td></tr>
+  {% endif %}
+
+  {# pulsante #}
+  <tr><td style="padding:28px 28px 8px;">
+    <a href="{{ sito }}/ordine/{{ ordine.id_ordini }}" style="display:inline-block;background:#2d4587;color:#ffffff;text-decoration:none;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:15px 30px;">Vedi il tuo ordine</a>
+  </td></tr>
+
+  {# capi #}
+  <tr><td style="padding:32px 28px 0;">
+    <p style="margin:0 0 4px;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#6f6f6f;">Il tuo ordine</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+      {% for r in righe %}
+      <tr>
+        <td width="72" style="padding:14px 0;border-bottom:1px solid #e6e3dc;vertical-align:top;">
+          {% if r.immagine %}<img src="{{ foto(r.immagine) }}" width="60" height="75" alt="" style="display:block;width:60px;height:75px;object-fit:cover;background:#f6f3ee;border:0;">{% endif %}
+        </td>
+        <td style="padding:14px 12px;border-bottom:1px solid #e6e3dc;vertical-align:top;font-size:14px;line-height:1.45;">
+          <span style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#2d4587;">{{ r.marca }}</span><br>
+          {{ r.nome }}<br>
+          <span style="font-size:13px;color:#6f6f6f;">{% if r.taglia %}Taglia {{ r.taglia }} · {% endif %}Quantità {{ r.quantita }}</span>
+        </td>
+        <td align="right" style="padding:14px 0;border-bottom:1px solid #e6e3dc;vertical-align:top;font-size:14px;white-space:nowrap;">{{ euro(r.prezzo * r.quantita) }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;">
+      <tr><td style="padding:14px 0 4px;color:#6f6f6f;">Spedizione</td><td align="right" style="padding:14px 0 4px;">{% if ordine.consegna == 'ritiro' %}Ritiro in negozio · gratis{% elif ordine.spedizione %}{{ euro(ordine.spedizione) }}{% else %}Gratis{% endif %}</td></tr>
+      <tr><td style="padding:6px 0 0;font-size:16px;font-weight:bold;">Totale</td><td align="right" style="padding:6px 0 0;font-size:16px;font-weight:bold;">{{ euro(ordine.totale) }}</td></tr>
+    </table>
+  </td></tr>
+
+  {# consegna e pagamento #}
+  <tr><td style="padding:28px 28px 0;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f6f3ee;">
+      <tr>
+        <td width="50%" style="padding:18px 20px;vertical-align:top;font-size:14px;line-height:1.55;">
+          <p style="margin:0 0 6px;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#6f6f6f;">{{ 'Ritiro' if ordine.consegna == 'ritiro' else 'Spedizione a' }}</p>
+          {% if ordine.consegna == 'ritiro' %}
+            Up Collection<br>{{ negozio.indirizzo }}
+          {% else %}
+            {{ ordine.destinatario }}<br>{{ ordine.indirizzo }}<br>{{ ordine.cap }} {{ ordine.citta }}
+          {% endif %}
+        </td>
+        <td width="50%" style="padding:18px 20px;vertical-align:top;font-size:14px;line-height:1.55;">
+          <p style="margin:0 0 6px;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#6f6f6f;">Pagamento</p>
+          {{ ordine.pagamento }}
+        </td>
+      </tr>
+    </table>
+  </td></tr>
+
+  {# contatti #}
+  <tr><td style="padding:32px 28px 36px;font-size:14px;line-height:1.6;color:#444444;">
+    Domande su taglie, tempi o resi? Rispondi a questa email o scrivici su
+    <a href="https://wa.me/{{ negozio.whatsapp }}" style="color:#2d4587;">WhatsApp</a>: ti risponde una persona del negozio.
+    <p style="margin:18px 0 0;font-family:Georgia,'Times New Roman',serif;font-size:18px;color:#151515;">Up Collection</p>
+    <p style="margin:2px 0 0;font-size:13px;color:#6f6f6f;">Torino, dagli anni '60</p>
+  </td></tr>
+</table>
+
+<p style="font-family:Helvetica,Arial,sans-serif;font-size:11px;line-height:1.6;color:#999999;margin:18px 0 0;">
+  {{ legali.ragione_sociale }} · {{ legali.sede }} · P.IVA {{ legali.piva }}<br>
+  Tel. {{ negozio.telefono }} · <a href="{{ sito }}/condizioni-di-vendita" style="color:#999999;">Condizioni di vendita</a> · <a href="{{ sito }}/privacy" style="color:#999999;">Privacy</a>
+</p>
+</td></tr>
+</table>
+</body>
+</html>

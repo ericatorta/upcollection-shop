@@ -8,7 +8,7 @@ import smtplib
 from urllib.parse import quote
 from email.message import EmailMessage
 
-from flask import current_app
+from flask import current_app, render_template
 
 log = logging.getLogger(__name__)
 
@@ -76,17 +76,59 @@ def link_whatsapp(ordine):
     return "https://wa.me/" + numero + "?text=" + quote(testo + "\n\nUp Collection")
 
 
+# stato -> (oggetto dell'email, titolo grande, occhiello sopra il titolo)
+TITOLI = {
+    "da confermare": ("Abbiamo ricevuto il tuo ordine #{n}", "Grazie, {nome}.", "Ordine ricevuto"),
+    "in attesa di pagamento": ("Ordine #{n} confermato: ecco come pagare", "È tutto disponibile.", "Ordine confermato"),
+    "confermato": ("Ordine #{n} confermato", "Lo stiamo preparando.", "Ordine confermato"),
+    "pronto per il ritiro": ("Il tuo ordine #{n} ti aspetta in negozio", "Ti aspettiamo.", "Pronto per il ritiro"),
+    "spedito": ("Il tuo ordine #{n} è partito", "È in viaggio.", "Ordine spedito"),
+    "annullato": ("Ordine #{n} annullato", "Ci dispiace, {nome}.", "Ordine annullato"),
+}
+
+
+def _foto(indirizzo):
+    """Le email hanno bisogno di indirizzi completi e delle foto piccole."""
+    if indirizzo and indirizzo.startswith("/"):
+        indirizzo = current_app.config["SITO_URL"] + indirizzo
+    return (indirizzo or "").replace(".jpg", "-s.jpg")
+
+
+def html_email(ordine, righe):
+    """La versione impaginata dell'email (templates/email/ordine.html)."""
+    testo = _testo(ordine, firma=False)
+    if not testo:
+        return None
+    nome = ordine["destinatario"].split(" ")[0]
+    _, titolo, occhiello = TITOLI[ordine["stato"]]
+    # il paragrafo principale è lo stesso del testo semplice, senza saluto e link
+    corpo = testo.split("\n\n")[1]
+    corpo = corpo[0].upper() + corpo[1:]
+    istruzioni = istruzioni_pagamento(ordine) if ordine["stato"] == "in attesa di pagamento" else ""
+    if istruzioni:
+        corpo = corpo.replace(" " + istruzioni, "")
+    return render_template(
+        "email/ordine.html",
+        ordine=ordine, righe=righe, foto=_foto, euro=_euro,
+        titolo=titolo.format(nome=nome), occhiello=occhiello, corpo=corpo, istruzioni=istruzioni,
+        sito=current_app.config["SITO_URL"], negozio=current_app.config["NEGOZIO"],
+        legali=current_app.config["DATI_LEGALI"],
+    )
+
+
 def avvisa_cliente(ordine, righe):
     c = current_app.config
     testo = _testo(ordine)
     if not c["SMTP_HOST"] or not testo:
         return
+    nome = ordine["destinatario"].split(" ")[0]
     messaggio = EmailMessage()
-    messaggio["Subject"] = "Ordine #" + str(ordine["id_ordini"]) + " · " + ordine["stato"]
+    messaggio["Subject"] = TITOLI[ordine["stato"]][0].format(n=ordine["id_ordini"], nome=nome)
     messaggio["From"] = c["EMAIL_MITTENTE"]
     messaggio["To"] = ordine["email"]
     messaggio["Reply-To"] = c["NEGOZIO"]["email"]
-    messaggio.set_content(testo)
+    messaggio.set_content(testo)  # per chi legge le email solo come testo
+    messaggio.add_alternative(html_email(ordine, righe), subtype="html")
     try:
         with smtplib.SMTP(c["SMTP_HOST"], c["SMTP_PORT"], timeout=10) as server:
             server.starttls()
