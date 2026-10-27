@@ -6,7 +6,7 @@
   <title>{% block titolo %}Abbigliamento uomo e donna a Torino{% endblock %} · Up Collection</title>
   <meta name="description" content="{% block descrizione %}Up Collection, negozio di abbigliamento uomo e donna a Torino dagli anni '60: Liu Jo, Blauer, Armani Exchange, Sun68, Happy Socks e altri marchi. Spedizione o ritiro gratuito in negozio.{% endblock %}">
   <link rel="icon" href="{{ url_for('static', filename='img/favicon.svg') }}" type="image/svg+xml">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=202610271">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=202610272">
 </head>
 <body class="{% block body_class %}{% endblock %}">
 
@@ -174,6 +174,7 @@
     <div class="wrap piede__fondo">
       <span>© Up Collection di Torta Federico e C. s.a.s. · Corso Racconigi 159/D, 10141 Torino · P.IVA 04924200019 · REA TO-670774</span>
       <span><a href="{{ url_for('shop.condizioni') }}">Condizioni di vendita</a> · <a href="{{ url_for('shop.privacy') }}">Privacy e cookie</a></span>
+      <span class="piede__firma">Sito realizzato da <a href="https://lytostudio.com" target="_blank" rel="noopener">Lyto Studio</a> · <a href="mailto:hello@lytostudio.com">hello@lytostudio.com</a></span>
     </div>
   </footer>
 
