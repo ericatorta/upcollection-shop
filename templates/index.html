@@ -47,7 +47,13 @@
   <div class="marchi__scorre">
     {% for giro in range(2) %}
       {% for m in marche %}
-        <a href="{{ url_for('shop.catalogo', marca=m.marca) }}">{{ m.marca }}</a><span aria-hidden="true">✦</span>
+        <a href="{{ url_for('shop.catalogo', marca=m.marca) }}"{% if giro %} tabindex="-1" aria-hidden="true"{% endif %}>
+          {%- if m.marca in loghi -%}
+            <img src="{{ url_for('static', filename='img/marchi/' ~ loghi[m.marca][0]) }}" alt="{{ m.marca }}" style="--k: {{ loghi[m.marca][1] }}">
+          {%- else -%}
+            {{ m.marca }}
+          {%- endif -%}
+        </a><span class="marchi__pallino" aria-hidden="true"></span>
       {% endfor %}
     {% endfor %}
   </div>
@@ -73,7 +79,7 @@
   <div class="sezione__testa">
     <div>
       <p class="occhiello">Scelti da noi</p>
-      <h2 class="titolo">Potrebbe piacerti</h2>
+      <h2 class="titolo">Potrebbero piacerti</h2>
     </div>
     <a class="link-freccia" href="{{ url_for('shop.catalogo') }}">Tutto il catalogo</a>
   </div>

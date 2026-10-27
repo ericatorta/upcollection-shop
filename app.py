@@ -33,7 +33,8 @@ def create_app():
     @app.context_processor
     def dati_comuni():
         # disponibili in tutti i template: dati del negozio
-        return {"negozio": Config.NEGOZIO, "soglia_gratis": Config.SOGLIA_SPEDIZIONE_GRATIS}
+        return {"negozio": Config.NEGOZIO, "soglia_gratis": Config.SOGLIA_SPEDIZIONE_GRATIS,
+                "loghi": Config.LOGHI_MARCHI}
 
     @app.errorhandler(404)
     def pagina_non_trovata(errore):

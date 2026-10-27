@@ -293,11 +293,17 @@ p { margin: 0 0 1em; }
 
 /* ---------- marchi che scorrono ---------- */
 .marchi { margin-top: clamp(56px, 8vw, 110px); border-top: 1px solid var(--linea); overflow: hidden; padding: 26px 0; }
-.marchi__scorre { display: flex; align-items: center; gap: 46px; width: max-content; animation: scorri 40s linear infinite; }
+.marchi__scorre { display: flex; align-items: center; gap: clamp(36px, 5vw, 64px); width: max-content; animation: scorri 45s linear infinite; }
 .marchi:hover .marchi__scorre { animation-play-state: paused; }
-.marchi a { font-family: var(--serif); font-size: clamp(26px, 3vw, 40px); white-space: nowrap; transition: color var(--veloce); }
-.marchi a:hover { color: var(--blu); font-style: italic; }
-.marchi span { color: var(--blu); font-size: 14px; }
+.marchi a { display: flex; align-items: center; height: 56px; font-family: var(--serif); font-size: clamp(26px, 3vw, 40px); white-space: nowrap; }
+/* i loghi nel blu Up Collection, qualsiasi sia il colore originale */
+.marchi img {
+  height: calc(80px * var(--k, .6)); width: auto;
+  filter: brightness(0) invert(24%) sepia(36%) saturate(1500%) hue-rotate(205deg) brightness(.9);
+  opacity: .85; transition: opacity var(--veloce), transform var(--veloce);
+}
+.marchi a:hover img { opacity: 1; transform: scale(1.05); }
+.marchi__pallino { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--blu); opacity: .6; }
 
 /* ---------- storia ---------- */
 .storia { background: var(--sabbia); margin-top: 0; padding-block: clamp(64px, 9vw, 130px); }
@@ -639,5 +645,6 @@ a.numero:hover { background: var(--sabbia-scura); transform: translateY(-2px); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
+  .marchi__scorre { animation: scorri 90s linear infinite !important; }
 }
 .pagina--media { max-width: 1000px; }

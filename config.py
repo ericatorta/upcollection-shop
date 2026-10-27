@@ -25,6 +25,22 @@ class Config:
     SOGLIA_SPEDIZIONE_GRATIS = 99
     COSTO_SPEDIZIONE = 7
 
+    # Loghi dei marchi nella fascia che scorre in home: file in static/img/marchi
+    # e "scala" (stessa superficie per tutti: i loghi lunghi più bassi, quelli quadrati più alti)
+    LOGHI_MARCHI = {
+        "Armani Exchange": ("armani-exchange.svg", 0.92),
+        "Blauer": ("blauer.png", 0.56),
+        "Bomboogie": ("bomboogie.png", 0.55),
+        "Gallo": ("gallo.svg", 0.66),
+        "Happy Socks": ("happy-socks.svg", 0.29),
+        "Jeckerson": ("jeckerson.svg", 0.34),
+        "Liu Jo": ("liu-jo.svg", 0.54),
+        "North Sails": ("north-sails.svg", 0.92),
+        "Roy Roger's": ("roy-rogers.svg", 0.31),
+        "Sun68": ("sun68.svg", 0.73),
+        "Take Two": ("take-two.png", 0.55),
+    }
+
     NEGOZIO = {
         "nome": "Up Collection",
         "indirizzo": "Corso Racconigi 159D, 10141 Torino",
