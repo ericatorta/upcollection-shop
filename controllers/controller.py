@@ -101,7 +101,9 @@ def righe_carrello():
     for chiave, quantita in session.get("carrello", {}).items():
         id_prodotti, taglia = chiave.split("|")
         prodotto = trova_prodotto(int(id_prodotti))
-        if prodotto:
+        # salto i capi spariti o con una taglia che il capo non ha più (es. catalogo cambiato)
+        taglia_valida = not prodotto or not prodotto["taglie"] or taglia in prodotto["taglie"].split(",")
+        if prodotto and taglia_valida:
             totale_riga = prodotto["prezzo"] * int(quantita)
             righe.append({
                 "chiave": chiave, "prodotto": prodotto, "taglia": taglia,
