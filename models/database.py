@@ -126,6 +126,16 @@ def crea_database():
         if "registrato" not in colonne:
             conn.execute("ALTER TABLE utenti ADD COLUMN registrato TEXT")
 
+        # i numeri d'ordine partono da 1000 (deciso il 27/10/2026): AUTOINCREMENT continua da qui
+        conn.execute("""
+            INSERT INTO sqlite_sequence (name, seq)
+            SELECT 'ordini', 999
+            WHERE NOT EXISTS (SELECT 1 FROM sqlite_sequence WHERE name = 'ordini')
+        """)
+        conn.execute("""
+            UPDATE sqlite_sequence SET seq = 999 WHERE name = 'ordini' AND seq < 999
+        """)
+
         # primo avvio online: solo l'admin, con la password scelta nel .env
         if conn.execute("SELECT COUNT(*) FROM utenti").fetchone()[0] == 0 and Config.ADMIN_PASSWORD:
             conn.execute("""
